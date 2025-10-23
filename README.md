@@ -22,7 +22,7 @@ python3 -m venv .venv   #Linux/WSL
 Agora ative seu ambiente virtual:
 
 ```Bash
-./.venv/Scripts/activate    #Windows
+.venv\Scripts\activate    #Windows
 
 source .venv/bin/activate   #Linux/WSL
 ```
