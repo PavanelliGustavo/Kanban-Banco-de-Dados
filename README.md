@@ -1,89 +1,137 @@
-# Universidade de Brasília
-## Instituto de Ciências Exatas
-### Departamento de Ciência da Computação
----
-# Disciplina: Banco de Dados
-## Projeto de Banco de Dados
+# Kanban de Transparência
 
-### Requisitos
+## Setup inicial de desenvolvimento
 
-Os requisitos básicos do projeto de banco de dados são:
+Antes de tudo, certifique-se de ter o `Python` instalado na versão 3.12.3 ou superior.
 
-* O projeto pode ser realizado em grupo composto por 2 ou 3 estudantes.
-* O trabalho obrigatoriamente deve ser apresentado por todos os componentes do grupo.
-* Apenas projetos que estejam funcionando terão suas notas contabilizadas.
-* Pode utilizar ferramentas de IA, porém, deve ser informado onde foi utilizado e com qual objetivo.
+Para verificar, execute em seu terminal:
 
----
+```bash
+python --version    # Windows
+python3 --version   # Linux/WSL
+```
 
-### Tema do Projeto
+Então, crie um ambiente virtual para instalar as dependências do projeto com o seguinte comando:
 
-Qualquer banco de dados que possa ser utilizado para facilitar a vida do administrador da sua cidade. Pode ser para auxiliar os governadores, prefeitos, a população do local.
+```bash
+python -m venv .venv    # Windows
+python3 -m venv .venv   # Linux/WSL
+```
 
-**Exemplos:**
+Agora ative seu ambiente virtual:
 
-* **Gestão de temas relacionados à saúde.** Gestão de hospital, médicos, e etc.
-* **Gestão de temas relacionados à educação.** Gestão de escolas, professores, e etc.
-* **Gestão de mobilidade.** Gestão do transporte público da cidade, e etc.
-* Qualquer outro tema que esteja relacionado com a administração de uma região administrativa.
+```bash
+.venv\Scripts\activate       # Windows
+source .venv/bin/activate    # Linux/WSL
+```
 
----
+Por fim, instale as dependências com o comando:
 
-### Datas Importantes:
+```bash
+pip install -r requirements.txt
+```
 
-| Evento | Data |
-| :--- | :--- |
-| Enviar os nomes dos componentes do grupo e o tema do projeto | 14/10 |
-| Entrega da primeira parte do projeto | 31/10 |
-| Entrega/Apresentação final do Projeto | 02/12-04/12 |
+Em caso de erro, certifique-se de que o comando `pip` está instalado com:
 
----
+```bash
+pip --version
+```
 
-### Regras:
+Se não estiver, execute:
 
-* Deve ter no mínimo **10 entidades**.
-* Cada tabela deve ter no mínimo **5 registros**.
-* O **CRUD** deve estar funcionando.
-* Pode utilizar qualquer **SGBD relacional**.
-* Pode utilizar qualquer **linguagem de programação** para o CRUD.
-* Porém, precisa de uma **interface gráfica** para o usuário leigo ter acesso ao CRUD.
+```bash
+python -m ensurepip --default-pip    # Windows
+sudo apt install python3-pip         # Linux/WSL
+```
 
----
+## Adição de novas dependências
 
-## 📦 Entrega da Primeira Parte do Projeto:
+Para adicionar novas dependências, primeiro certifique-se de que seu ambiente virtual existe e está ativado.
 
-* Introdução
-* Modelo de Entidade Relacionamento. Usando alguma ferramenta de modelagem.
-* Modelo Relacional. Usando alguma ferramenta de modelagem.
-* O script SQL que gerou o banco de dados
+Então, execute o comando:
 
-**A ser encaminhado pelo Aprender3:**
-* No formato **pdf em apenas UM arquivo** para a primeira entrega:
-    * Introdução
-    * Diagrama de Entidade Relacionamento
-    * Modelo Relacional
+```bash
+pip install nome_da_dependência
+```
 
----
+E por fim, atualize o arquivo `requirements.txt` com as novas dependências utilizando o comando:
 
-## 🚀 Entrega Final do Projeto:
+```bash
+pip freeze > requirements.txt
+```
 
-### Documentação (A ser encaminhado pelo Aprender3 no formato PDF em UM arquivo)
+## Estrutura do projeto
 
-* No início do PDF informar o **endereço do github**.
-* Introdução
-* Modelo de Entidade Relacionamento. Usando alguma ferramenta de modelagem.
-* Modelo Relacional. Usando alguma ferramenta de modelagem.
-* O diagrama da camada de mapeamento para uma tabela do banco de dados
+O projeto apresenta a seguinte estrutura de diretórios:
 
-### Implementação e Código (A ser colocado no GitHub)
+```
+KANBAN-BANCO-DE-DADOS/
+│
+├── .venv/
+│
+├── app/
+│   ├── controllers/
+│   │
+│   ├── models/
+│   │
+│   ├── routes/
+│   │
+│   ├── sql/
+│   │   ├── commands/
+│   │   └── migrations/
+│   │
+│   ├── static/
+│   │   ├── css/
+│   │   ├── img/
+│   │   └── js/
+│   │
+│   ├── templates/
+│   │
+│   └── config.py
+│
+├── tests/
+│
+├── .gitignore
+├── PROJECT-INSTRUCTIONS.md
+├── README.md
+├── requirements.txt
+└── run.py
+```
 
-* O **script SQL** que gerou o banco de dados.
-* **Todos os códigos** do projeto.
-* A construção da camada de persistência. Enviar o link do github com os códigos fontes e um diagrama apresentando como a interface gráfica do programa acessa a camada de persistência.
-* Um programa com as funções de **CRUD** (Create Read Update Delete) para o seu sistema.
-* Na implementação de pelo menos uma tabela usar um **gerador de chave primária automático** do SGBD selecionado para o projeto.
-* Acessar **mais de uma tabela** nas mesmas funções CRUD para garantir **integridade referencial**.
-* Utilização de pelo menos uma **View**. A complexidade da view será avaliada.
-* Utilização de pelo menos uma **Procedure**. A complexidade da procedure será avaliada.
-* Utilização de pelo menos um **Trigger**. A complexidade do trigger será avaliada.
-* Inserção de um **dado binário** no banco, pode ser foto, arquivo PDF ou outro tipo de arquivo.
+- `app/` é o diretório que contém todos os componentes estruturais do projeto (models, views, controllers, etc.).
+- `app/controllers/` é o diretório que contem todas as implementações de controladoras, que devem estabelecer a comunicação entre views e models.
+- `app/models/` é o diretório que contem todas as implementações de modelos, e é o único módulo que deve interagir diretamente com o banco de dados.
+- `app/routes/` é o diretório onde devem ser declaradas todas as rotas do projeto, de forma que o usuário possa navegar entre telas.
+
+```python
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/login')
+def login():
+    return render_template("login.html")
+```
+
+> **ℹ️ O que é uma rota?**  
+> Em aplicações web, rotas são formas de associar URLs a funções do código. No exemplo acima, a URL `http://localhost:5000/login` está vinculada à função `login()`. Ao acessar essa URL no navegador, a função será executada e o template `login.html` será exibido.
+
+- `app/sql/` é o diretório que registrará todos os comandos a serem executados no banco de dados.
+- `app/sql/commands/` é o diretório que conterá os comandos SQL a serem utilizados pelas models, como comandos de consultas, inserções de dados e até o próprio comando de criação do banco de dados.
+- `app/sql/migrations/` é o diretório que conterá todos os comandos SQL relacionados a migrações de banco de dados. As migrações devem funcionar como um histórico de todas as alterações feitas à estrutura do banco e devem seguir rigidamente a estrutura de nomenclatura `YYYYMMDD_HHmm_description.sql` (ex: `20251023_1659_add_email_to_users.sql`).
+
+   - Não perca tempo pensando em uma descrição elaborada — a real importância do nome está no `timestamp`, já que ele garantirá que as migrações possam ser executadas em ordem.
+
+> **ℹ️ O que é uma migração?**  
+> No contexto de bancos de dados, migrações são comandos SQL que modificam a estrutura do banco após sua criação. Elas permitem que qualquer pessoa, com acesso ao script de criação e às migrações, possa reproduzir a mesma estrutura final do banco executando os arquivos em ordem.
+
+> ⚠️ **Atenção:**  
+> Todo arquivo contido em `app/sql/` deve conter a extensão `.sql`, e só devem ser colocados em um mesmo arquivo comandos cuja execução esteja intimamente atrelada (ex: criação das diferentes tabelas do banco de dados).
+
+- `app/static/` é o diretório que encapsula a estilização e responsividade do front-end da aplicação.
+- `app/static/css/` é o diretório que conterá os arquivos com extensão `.css`, responsáveis por estilizar os templates.
+- `app/static/img/` é o diretório responsável por armazenar as imagens utilizadas no projeto, se houver.
+- `app/static/js/` é o diretório que conterá os arquivos com extensão `.js`, encarregados de armazenar o código em JavaScript que fornecerá responsividade aos templates.
+- `app/templates/` é o diretório que conterá os arquivos com extensão `.html`, e efetivamente representará as `views` da aplicação. O nome `templates` é pré-estabelecido para que o `Flask` consiga localizar e exibir as views da aplicação com o método `render_template()`.
+- `tests/` é o diretório onde qualquer teste criado deve ser inserido.
+- `run.py` é o arquivo principal de execução da aplicação, equivalente a uma `main`, porém seguindo a convenção de nomenclatura do `Flask`.
