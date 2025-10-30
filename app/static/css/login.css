@@ -1,0 +1,8 @@
+body {
+    background: linear-gradient(to top, #0a3521, #28a745 70%);
+    background-attachment: fixed;
+}
+
+.user-type {
+    width: 150px;
+}
