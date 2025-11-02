@@ -1,8 +1,111 @@
+:root {
+    --marine-blue: rgb(22, 22, 120);
+}
+
 body {
-    background: linear-gradient(to top, #0a3521, #28a745 70%);
+    margin-top: 70px;
+    background: white;
     background-attachment: fixed;
+    height: 100%;
+    margin: 0;
+}
+
+.page-container {
+    max-width: 600px;
+    height: 100vh;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2)
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: bold;
+    border-width: 3px;
+    color: var(--marine-blue);
+}
+
+.description {
+    font-size: 1.25rem;
+    color: var(--marine-blue);
+    font-weight: 400;
+    margin-top: 50px;
+}
+
+.input-container {
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
+}
+
+.input-field {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 10px;
+    padding: 5px;
+}
+
+.user-type-radio {
+    display: none;
 }
 
 .user-type {
+    border: solid 2px;
+    padding: 7px;
+    border-color: var(--marine-blue);
+    border-radius: 5px;
+    color: var(--marine-blue);
     width: 150px;
+}
+
+.user-type:hover {
+    border-color: green;
+    color: green;
+}
+
+.enter {
+    width: 100px;
+    margin-top: 20px;
+    padding: 6px;
+    border: 2px solid;
+    border-width: 1px;
+    border-radius: 20px;
+    background-color: green;
+    font-size: large;
+    font-weight: 400;
+    color: white;
+}
+
+.enter:hover {
+    transition: ease-in 0.1s;
+    background-color: rgb(50, 170, 50);
+    border-color: white;
+}
+
+.enter:active {
+    background-color: rgb(100, 200, 100);
+    border-color: white;
+}
+
+.gov-logo {
+    height: 40px;
+}
+
+.unb-logo {
+    height: 50px;
+}
+
+.footer-text {
+    margin-top: 15px;
+}
+
+footer {
+    background-color: var(--marine-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    font-size: 0.9rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }
