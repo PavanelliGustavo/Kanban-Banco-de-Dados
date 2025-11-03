@@ -99,12 +99,15 @@ body {
 }
 
 .login-section {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
 .enter {
+    display: block;
+    margin: 20px auto 0 auto;
     width: 100px;
     margin-top: 20px;
     padding: 6px;
