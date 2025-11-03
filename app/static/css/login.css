@@ -2,6 +2,21 @@
     --marine-blue: rgb(22, 22, 120);
 }
 
+header {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.gov-logo-header {
+    height: 50px;
+}
+
 body {
     margin-top: 70px;
     background: white;
@@ -13,10 +28,11 @@ body {
 .page-container {
     max-width: 600px;
     height: 100vh;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2)
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .title {
+    margin-top: 100px;
     font-size: 3rem;
     font-weight: bold;
     border-width: 3px;
@@ -85,7 +101,7 @@ body {
     border-color: white;
 }
 
-.gov-logo {
+.gov-logo-footer {
     height: 40px;
 }
 
