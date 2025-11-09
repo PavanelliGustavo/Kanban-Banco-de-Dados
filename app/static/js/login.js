@@ -18,6 +18,13 @@ const placeholders_dict = {
     }
 };
 
+function updateInputRequiredAttributeStatus(user_type_id) {
+    const isCivil = user_type_id === "optCivil";
+    user_input.required = !isCivil;
+    password_input.required = !isCivil;
+    user_input.disabled = isCivil;
+    password_input.disabled = isCivil;
+}
 
 function updateAplicationEntranceMethod(user_type_id) {
     login_section.style.display = "block";
@@ -33,13 +40,10 @@ function updateAplicationEntranceMethod(user_type_id) {
 function displayAplicationEntranceMethod() {
     let selected_user_type = document.querySelectorAll('input[name="user-type"]');
     selected_user_type.forEach((option) => {
-        if (option.checked) {
+        option.addEventListener("click", () => {
+            updateInputRequiredAttributeStatus(option.id)
             updateAplicationEntranceMethod(option.id);
-            login_section.classList.remove("visually-hidden");
-        }
-        option.addEventListener("change", () => {
-            updateAplicationEntranceMethod(option.id);
-        });
+        })
     });
 }
 

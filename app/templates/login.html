@@ -16,7 +16,16 @@
             <img src="static/img/gov_br_logo_colored.png" alt="Logo Governo Federal Colorida" class="gov-logo-header">
         </header>
     </div>
-    <div class="container py-5 page-container">
+
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+            {% for categoria, mensagem in mensagens %}
+            <div class="alert">{{ mensagem }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="page-container">
 
         <img src="static/img/civil_construction.jpg" alt="Construção Civil" class="civil-construction">
 
@@ -26,26 +35,25 @@
                 Escolha o tipo de usuário para acessar o sistema:
             </p>
 
-            <form id="userType">
+            <form id="userType" action="{{ url_for('user_bp.login_request') }}" method="POST">
 
                 <fieldset class="btn-group mb-4" role="group" aria-label="User type selection">
 
-                    <input type="radio" class="user-type-radio" name="user-type" id="optCivil" autocomplete="off">
+                    <input type="radio" class="user-type-radio" name="user-type" id="optCivil" value="civil">
                     <label class="user-type" for="optCivil">Civil</label>
 
-                    <input type="radio" class="user-type-radio" name="user-type" id="optGovernamental"
-                        autocomplete="off">
+                    <input type="radio" class="user-type-radio" name="user-type" id="optGovernamental" value="governamental">
                     <label class="user-type" for="optGovernamental">Governamental</label>
 
-                    <input type="radio" class="user-type-radio" name="user-type" id="optEmpresarial" autocomplete="off">
+                    <input type="radio" class="user-type-radio" name="user-type" id="optEmpresarial" value="empresarial">
                     <label class="user-type" for="optEmpresarial">Empresarial</label>
 
                 </fieldset>
 
                 <div class="login-section" id="login-section">
-                    <div class="input-container" id="login-fields">
-                        <input class="input-field" id="user" type="text" placeholder="" required />
-                        <input class="input-field" id="password" type="text" placeholder="" required />
+                    <div class="input-container" id="login-fields">                            
+                        <input class="input-field" name="user_input" id="user" type="text" placeholder="" required />
+                        <input class="input-field" name="password_input" id="password" type="password" placeholder="" required />                                            
                     </div>
                     <div>
                         <button class="enter" type="submit">Entrar</button>

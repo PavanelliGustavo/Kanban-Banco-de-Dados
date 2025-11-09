@@ -17,6 +17,31 @@ header {
     height: 50px;
 }
 
+@keyframes alert_fade_in {
+    0% { opacity: 0; transform: translateX(-300px); }
+    100% { opacity: 1; transform: translateX(0px); }
+}
+
+@keyframes alert_fade_out {
+    0% {opacity: 1; transform: translateY(0px);}
+    100% {opacity: 0; transform: translateY(-50px);}
+}
+
+.alert{
+    animation:
+        alert_fade_in 1s ease-out 0s forwards,
+        alert_fade_out 1s ease-out 5s forwards;
+    position: absolute;
+    background: linear-gradient(45deg, rgb(255, 85, 55) 20%, rgb(255, 145, 130) 100%);
+    width: 300px;
+    text-align: left;
+    margin-top: 30px;
+    margin-left: 20px;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 body {
     overflow-x: hidden;
     margin-top: 70px;
@@ -27,6 +52,7 @@ body {
 }
 
 .page-container {
+    margin-top: 70px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -44,7 +70,9 @@ body {
     margin-top: 100px;
     max-width: 550px;
     height: 450px;
-    padding: 20px;
+    padding: 30px;
+    border: 1px solid transparent;
+    border-radius: 5px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
@@ -53,7 +81,7 @@ body {
 
 .title {
     position: absolute;
-    top: 0;
+    top: 10;
     font-size: 3rem;
     font-weight: bold;
     border-width: 3px;
