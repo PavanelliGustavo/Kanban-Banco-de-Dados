@@ -2,13 +2,20 @@
 
 ## Setup inicial de desenvolvimento
 
-Antes de tudo, certifique-se de ter o `Python` instalado na versão 3.12.3 ou superior.
+Antes de tudo, certifique-se de ter o `Python` instalado na versão **3.12.3** ou superior e o `PostgreSQL` na versão **18** ou superior.
+
+> ⚠️ **Atenção:**
+> O banco de dados utilizado nesse projeto é executado localmente, portanto a permanência ocorre apenas no dispositivo executante. Sempre que inicializar o projeto em um novo dispositivo é necessário criar o banco de dados novamente e adicionar os registros desejados.
 
 Para verificar, execute em seu terminal:
 
 ```bash
 python --version    # Windows
 python3 --version   # Linux/WSL
+```
+e em seguida:
+```Bash
+psql --version
 ```
 
 Então, crie um ambiente virtual para instalar as dependências do projeto com o seguinte comando:
@@ -25,7 +32,7 @@ Agora ative seu ambiente virtual:
 source .venv/bin/activate    # Linux/WSL
 ```
 
-Por fim, instale as dependências com o comando:
+Em seguida, instale as dependências com o comando:
 
 ```bash
 pip install -r requirements.txt
@@ -42,6 +49,29 @@ Se não estiver, execute:
 ```bash
 python -m ensurepip --default-pip    # Windows
 sudo apt install python3-pip         # Linux/WSL
+```
+
+Agora, inicialize sua conexão com o `PostgreSQL`:
+```Bash
+psql -U postgres
+```
+Então, insira sua senha de usuário postgres e será aberto o prompt de comando `psql`.
+
+Nesse prompt você pode imprimir comandos em linguagem SQL diretamente, ou executar arquivos com extensão `.sql` para efetuar multiplos comandos de uma só vez.
+
+Execute:
+```SQL
+CREATE DATABASE kanban_db
+```
+
+Agora, conecte-se ao banco de dados recém criado:
+```Bash
+\c kanban_db
+```
+
+Por fim, execute o arquivo de criação das tabelas:
+```Bash
+\i "Caminho para o arquivo create_database.sql"
 ```
 
 ## Adição de novas dependências
