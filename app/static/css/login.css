@@ -18,16 +18,30 @@ header {
 }
 
 @keyframes alert_fade_in {
-    0% { opacity: 0; transform: translateX(-300px); }
-    100% { opacity: 1; transform: translateX(0px); }
+    0% {
+        opacity: 0;
+        transform: translateX(-300px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0px);
+    }
 }
 
 @keyframes alert_fade_out {
-    0% {opacity: 1; transform: translateY(0px);}
-    100% {opacity: 0; transform: translateY(-50px);}
+    0% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
 }
 
-.alert{
+.alert {
     animation:
         alert_fade_in 1s ease-out 0s forwards,
         alert_fade_out 1s ease-out 5s forwards;
@@ -43,7 +57,7 @@ header {
 }
 
 body {
-    overflow-x: hidden;
+    overflow: hidden;
     margin-top: 70px;
     background: white;
     background-attachment: fixed;
@@ -52,7 +66,7 @@ body {
 }
 
 .page-container {
-    margin-top: 70px;
+    margin-top: 50px;
     display: flex;
     flex-direction: row;
     align-items: center;

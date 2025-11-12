@@ -9,11 +9,11 @@ const user_type_options = document.querySelectorAll('input[name="user-type"]');
 
 const placeholders_dict = {
     optGovernamental: {
-        user: "Digite sua matrícula...",
+        user: "Digite seu email institucional...",
         password: "Digite sua senha..."
     },
     optEmpresarial: {
-        user: "Digite o CNPJ da empresa...",
+        user: "Digite seu e-mail corporativo...",
         password: "Digite a senha de acesso da empresa..."
     }
 };
