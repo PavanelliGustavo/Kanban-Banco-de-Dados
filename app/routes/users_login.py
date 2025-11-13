@@ -16,11 +16,12 @@ def login_request():
     user_type = parameters.get("user-type")
 
     if user_type == "civil":
-        # logica para redirecionar o usuario civil
-        pass
+        # substituir pela logica para redirecionar o usuario civil
+        flash("ERRO: usuário ou senha incorretos", "error")
+        return redirect(url_for('user_bp.login'))
     else:
         user = parameters.get("user_input")
         password = parameters.get("password_input")
         # logica para verificar usuario e senha
-        flash("ERRO: usuário ou senha incorretos", "info")
+        flash("ERRO: usuário ou senha incorretos", "error")
         return redirect(url_for('user_bp.login'))

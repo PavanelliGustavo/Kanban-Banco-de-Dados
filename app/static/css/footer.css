@@ -1,0 +1,24 @@
+.gov-logo-footer {
+    height: 40px;
+}
+
+.unb-logo {
+    height: 50px;
+}
+
+.footer-text {
+    margin-top: 15px;
+}
+
+footer {
+    background-color: var(--marine-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    font-size: 0.9rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}

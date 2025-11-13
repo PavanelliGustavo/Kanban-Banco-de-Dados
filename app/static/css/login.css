@@ -1,68 +1,18 @@
+@import url("header.css");
+@import url("flash.css");
+@import url("footer.css");
+
 :root {
     --marine-blue: rgb(22, 22, 120);
 }
 
-header {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    background-color: white;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.gov-logo-header {
-    height: 50px;
-}
-
-@keyframes alert_fade_in {
-    0% {
-        opacity: 0;
-        transform: translateX(-300px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateX(0px);
-    }
-}
-
-@keyframes alert_fade_out {
-    0% {
-        opacity: 1;
-        transform: translateY(0px);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translateY(-50px);
-    }
-}
-
-.alert {
-    animation:
-        alert_fade_in 1s ease-out 0s forwards,
-        alert_fade_out 1s ease-out 5s forwards;
-    position: absolute;
-    background: linear-gradient(45deg, rgb(255, 85, 55) 20%, rgb(255, 145, 130) 100%);
-    width: 300px;
-    text-align: left;
-    margin-top: 30px;
-    margin-left: 20px;
-    border: none;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
 body {
-    overflow: hidden;
-    margin-top: 70px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0;
     background: white;
     background-attachment: fixed;
     height: 100%;
-    margin: 0;
 }
 
 .page-container {
@@ -80,6 +30,7 @@ body {
 }
 
 .structured-content {
+    background: white;
     position: relative;
     margin-top: 100px;
     max-width: 550px;
@@ -91,6 +42,7 @@ body {
     display: flex;
     align-items: center;
     flex-direction: column;
+    z-index: 1;
 }
 
 .title {
@@ -171,31 +123,6 @@ body {
 .enter:active {
     background-color: rgb(100, 200, 100);
     border-color: white;
-}
-
-.gov-logo-footer {
-    height: 40px;
-}
-
-.unb-logo {
-    height: 50px;
-}
-
-.footer-text {
-    margin-top: 15px;
-}
-
-footer {
-    background-color: var(--marine-blue);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px;
-    font-size: 0.9rem;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
 }
 
 @media (max-width: 1200px) {
