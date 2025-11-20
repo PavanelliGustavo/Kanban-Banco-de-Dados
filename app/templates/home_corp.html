@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Obras Transparentes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_corp.css') }}">
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js"></script>
+</head>
+
+<body>
+    <div>
+        {% include "header.html" %}
+    </div>
+
+    {% include "flash.html" %}
+
+    <div class="page-container">
+
+        <div class="user-options">
+
+            <div class="option">
+                <img src="static/img/profile_logo.png" alt="Profile" class="profile-logo">
+                <p>Meu Perfil</p>
+            </div>
+
+            <div class="option">
+                <img src="static/img/construction_icon.png" alt="Minhas Obras" class="construction-icon">
+                <p>Minhas Obras</p>
+            </div>
+
+            <div class="option">
+                <img src="static/img/document_icon.png" alt="Meus Documentos" class="document-icon">
+                <p>Meus Documentos</p>
+            </div>
+        </div>
+    </div>
+    <div>
+        {% include "footer.html" %}
+    </div>
+    <script src="static/js/home_corp.js"></script>
+    <script src="static/js/flash.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

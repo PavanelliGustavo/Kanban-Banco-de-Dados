@@ -11,7 +11,7 @@
 }
 
 footer {
-    background-color: var(--marine-blue);
+    background-color: rgb(22, 22, 120);
     color: white;
     display: flex;
     align-items: center;

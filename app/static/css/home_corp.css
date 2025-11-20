@@ -1,0 +1,59 @@
+@import url("header.css");
+@import url("flash.css");
+@import url("footer.css");
+
+body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0;
+    background: white;
+    background-attachment: fixed;
+    height: 100%;
+}
+
+.page-container {
+    margin-top: 200px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-options {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.option {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    height: 300px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    align-items: center;
+    justify-content: space-around;
+    transition: ease-in 0.15s;
+}
+
+.option:hover {
+    transform: translateY(-5px);
+    background: rgb(200, 200, 225);
+    cursor: pointer;
+}
+
+.option p {
+    font-family: 'Roboto', sans-serif;
+    font-size: 21px;
+    font-weight: 1000;
+    color: #161678;
+    margin-top: 8px;
+}
+
+.option img {
+    height: 200px;
+}

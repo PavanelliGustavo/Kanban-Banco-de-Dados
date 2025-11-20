@@ -24,4 +24,4 @@ def login_request():
         password = parameters.get("password_input")
         # logica para verificar usuario e senha
         flash("ERRO: usuário ou senha incorretos", "error")
-        return redirect(url_for('user_bp.login'))
+        return redirect(url_for('home_corp_bp.home'))
