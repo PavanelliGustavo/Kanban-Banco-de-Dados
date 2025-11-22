@@ -21,7 +21,7 @@ def login_request():
     else:
         user = parameters.get("user_input")
         password = parameters.get("password_input")
-        return redirect(url_for("home_gov_bp.home"))
+        return redirect(url_for("home_corp_bp.home"))
 
         # logica para verificar usuario e senha
 
