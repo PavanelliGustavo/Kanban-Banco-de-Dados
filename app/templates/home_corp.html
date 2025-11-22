@@ -26,7 +26,27 @@
                 <p>Meu Perfil</p>
             </button>
             <dialog class="profile-modal">
-                bazinga
+
+                <div class="modal-header">
+                    {{ corp.name }}
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" class="profile-form">
+                    <div class="profile-picture-input" id="drop-zone">
+                        {% if corp.profile_picture %}
+                        <img src="data:image/png;base64,{{ corp.profile_picture }}" alt="Foto do Perfil"
+                            class="profile-picture">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='img/image_missing.png') }}" alt="Imagem Indisponível"
+                            class="profile-picture">
+                        {% endif %}
+                    </div>
+
+                    <input type="file" name="profile_picture" id="pfp-input" accept="image/*" style="display:none;">
+                </form>
+
+
+
             </dialog>
 
             <button class="option">

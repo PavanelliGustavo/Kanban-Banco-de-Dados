@@ -6,4 +6,5 @@ home_corp_bp = Blueprint("home_corp_bp", __name__)
 
 @home_corp_bp.route("/home_corp")
 def home():
-    return render_template("home_corp.html")
+    example_corp = {"name": "Odebrecht Engenharia e Construção"}
+    return render_template("home_corp.html", corp=example_corp)
