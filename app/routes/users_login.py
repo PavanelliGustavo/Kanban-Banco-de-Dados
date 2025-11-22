@@ -1,5 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, render_template, flash, session
-
+from flask import Blueprint, render_template, request, redirect, url_for, render_template, flash
 
 user_bp = Blueprint("user_bp", __name__)
 
@@ -22,6 +21,9 @@ def login_request():
     else:
         user = parameters.get("user_input")
         password = parameters.get("password_input")
+        return redirect(url_for("home_gov_bp.home"))
+
         # logica para verificar usuario e senha
-        flash("ERRO: usuário ou senha incorretos", "error")
-        return redirect(url_for('home_corp_bp.home'))
+
+        #flash("ERRO: usuário ou senha incorretos", "error")
+        #return redirect(url_for('user_bp.login'))
