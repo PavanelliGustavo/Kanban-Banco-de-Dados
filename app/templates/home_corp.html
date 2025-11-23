@@ -28,10 +28,11 @@
             <dialog class="profile-modal">
 
                 <div class="modal-header">
-                    {{ corp.name }}
+                    {{ corp.company_name }}
                 </div>
 
-                <form method="POST" enctype="multipart/form-data" class="profile-form">
+                <form method="POST" enctype="multipart/form-data" class="profile-form"
+                    action="{{ url_for('home_corp_bp.edit_profile') }}">
                     <div class="profile-picture-input" id="drop-zone">
                         {% if corp.profile_picture %}
                         <img src="data:image/png;base64,{{ corp.profile_picture }}" alt="Foto do Perfil"
@@ -41,11 +42,35 @@
                             class="profile-picture">
                         {% endif %}
                     </div>
-
                     <input type="file" name="profile_picture" id="pfp-input" accept="image/*" style="display:none;">
+                    <div class="form-agregate">
+                        <div class="form-field">
+                            <div class="field-name">CNPJ:</div>
+                            <div class="field-value uneditable">{{ corp.cnpj }}</div>
+                        </div>
+                        <div class="form-field">
+                            <div class="field-name">E-MAIL:</div>
+                            <div class="field-value uneditable">{{ corp.email }}</div>
+                        </div>
+                    </div>
+                    <div class="form-agregate">
+                        <div class="form-field">
+                            <span class="field-name">NOME:</span>
+                            <input type="text" name="user_name" id="user_name" class="field-value editable"
+                                value="{{ corp.user_name }}" pattern="[A-Za-z\s]+">
+                        </div>
+                        <div class="form-field">
+                            <span class="field-name">SENHA:</span>
+                            <input type="password" name="password" id="password" class="field-value editable"
+                                pattern="[A-Za-z0-9!@#$%&]+">
+                        </div>
+                    </div>
+                    <div class="form-action">
+                        <button type="button" class="exit-button" onclick="closeProfileModal()">Sair</button>
+                        <button type="submit" class="submit-button">Salvar</button>
+                    </div>
+
                 </form>
-
-
 
             </dialog>
 

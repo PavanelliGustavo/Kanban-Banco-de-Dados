@@ -81,7 +81,7 @@ dialog::backdrop {
 
 .profile-modal {
     height: 1000px;
-    width: 500px;
+    width: 1000px;
     border: solid 0px transparent;
     border-radius: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -122,6 +122,14 @@ dialog::backdrop {
     }
 }
 
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    height: 100%;
+}
+
 .profile-picture-input {
     background: lightgray;
     border: solid 0px transparent;
@@ -148,4 +156,85 @@ dialog::backdrop {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     transition: all 0.1s ease;
     transform: scale(1.05);
+}
+
+.form-agregate {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    width: 80%;
+}
+
+.form-field {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    background: rgb(240, 240, 240);
+    border: solid 1px rgb(190, 190, 190);
+    border-radius: 3px;
+    padding: 5px;
+    font-size: large;
+}
+
+.form-field .field-name {
+    color: rgb(125, 125, 125);
+    font-weight: bold;
+}
+
+.form-field .field-value {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: large;
+    outline: none;
+}
+
+.form-field .editable {
+    color: rgb(25, 25, 25);
+}
+
+.form-field .uneditable {
+    color: rgb(70, 70, 70);
+}
+
+.form-action {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    justify-content: center;
+}
+
+.form-action button {
+    height: 50px;
+    width: 100px;
+    color: white;
+    font-size: large;
+    font-weight: bold;
+    border: solid 0px transparent;
+    border-radius: 3px;
+}
+
+.form-action button:hover {
+    transform: scale(1.02);
+}
+
+.exit-button {
+    background: rgb(170, 0, 0);
+}
+
+.exit-button:hover {
+    background: rgb(215, 0, 0);
+}
+
+.submit-button {
+    background: green;
+}
+
+.submit-button:hover {
+    background: rgb(0, 175, 0);
 }

@@ -1,6 +1,7 @@
 let profile_modal = document.querySelector(".profile-modal");
 let drop_zone = document.getElementById("drop-zone");
 let pfp_input = document.getElementById("pfp-input");
+let user_input = document.getElementById('user_name');
 
 function openProfileModal() {
     profile_modal.showModal();
@@ -55,8 +56,65 @@ function showPreviewOnDragedFile() {
     });
 }
 
+function sanitizeUserInput(value) {
+    return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .replace(/[^A-Z ]/g, '');
+}
+
+function dinamicalyFormatUserInput() {
+    user_input.addEventListener('input', () => {
+        const cleaned = sanitizeUserInput(user_input.value);
+
+        if (cleaned !== user_input.value) {
+            const pos = user_input.selectionStart;
+            user_input.value = cleaned;
+            user_input.setSelectionRange(pos, pos);
+        }
+
+        if (user_input.validity.patternMismatch) {
+            user_input.setCustomValidity('Use apenas letras (A–Z) e espaços');
+        } else {
+            user_input.setCustomValidity('');
+        }
+    });
+}
+
+function formatPasteInput(inputEl) {
+    inputEl.addEventListener('paste', async (e) => {
+        e.preventDefault();
+
+        let text = e.clipboardData && e.clipboardData.getData
+            ? e.clipboardData.getData('text')
+            : '';
+
+        if (!text && navigator.clipboard && navigator.clipboard.readText) {
+            try {
+                text = await navigator.clipboard.readText();
+            } catch (err) {
+                console.error('Não foi possível ler a área de transferência:', err);
+            }
+        }
+
+        const sanitized = sanitizeUserInput(text);
+        const start = inputEl.selectionStart ?? inputEl.value.length;
+        const end = inputEl.selectionEnd ?? inputEl.value.length;
+        const value = inputEl.value;
+
+        inputEl.value = value.slice(0, start) + sanitized + value.slice(end);
+
+        const caret = start + sanitized.length;
+        inputEl.setSelectionRange(caret, caret);
+    });
+}
+
+
 openFileSelectorOnClick();
 detectDragOver();
 detectDragLeave();
 showPreviewOnSelectedFile();
 showPreviewOnDragedFile();
+dinamicalyFormatUserInput()
+formatPasteInput()
