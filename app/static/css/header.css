@@ -1,0 +1,42 @@
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.gov-logo-header {
+    height: 50px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 45px;
+    width: 45px;
+    display: flex;
+    border: solid 1px transparent;
+    border-radius: 25px;
+}
+
+.header-left:hover {
+    background: rgb(200, 224, 255);
+}
+
+.bar-menu-icon {
+    margin-top: -5px;
+    height: 27px;
+    margin-top: 10px;
+    filter: brightness(50%) saturate(100%) invert(14%) sepia(100%) saturate(10000%) hue-rotate(200deg);
+    transform: translateY(-5px);
+}
+
+.bar-menu-icon:hover {
+    cursor: pointer;
+}
