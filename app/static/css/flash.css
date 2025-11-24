@@ -1,0 +1,53 @@
+.flash {
+    width: 300px;
+    text-align: left;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    animation:
+        alert_fade_in 1s ease-out forwards,
+        alert_fade_out 1s ease-out 5s forwards;
+    pointer-events: auto;
+    z-index: 9999;
+}
+
+.error {
+    background: linear-gradient(to right, rgb(255, 75, 75) 20%, rgb(255, 145, 130) 100%);
+}
+
+.warning {
+    background: linear-gradient(to right, rgb(255, 145, 55) 20%, rgb(255, 175, 130) 100%)
+}
+
+.message {
+    background: linear-gradient(to right, rgb(95, 95, 255) 20%, rgb(160, 160, 255) 100%);
+}
+
+.info {
+    background: linear-gradient(to right, rgb(55, 255, 145) 20%, rgb(130, 255, 175) 100%);
+}
+
+@keyframes alert_fade_in {
+    0% {
+        opacity: 0;
+        transform: translateX(-300px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0px);
+    }
+}
+
+@keyframes alert_fade_out {
+    0% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+}
