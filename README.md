@@ -2,6 +2,8 @@
 
 ## Setup inicial de desenvolvimento
 
+### Ambiente Virtual
+
 Antes de tudo, certifique-se de ter o `Python` instalado na versão 3.12.3 ou superior.
 
 Para verificar, execute em seu terminal:
@@ -43,6 +45,47 @@ Se não estiver, execute:
 python -m ensurepip --default-pip    # Windows
 sudo apt install python3-pip         # Linux/WSL
 ```
+
+### Variáveis de Ambiente
+
+Crie um arquivo `.env` com a variável `POSTGRES_PASSWORD` e posteriormente adicione o valor referente à senha da sua conta postgres
+
+### Banco de Dados
+
+O SGBD escolhido para esse projeto é o PostgreSQL, principalmente devido à sua robustez e capacidade de suprir todos os requisitos do projeto.
+
+Para fazer a instalação em windows siga as instruções do site oficial https://www.postgresql.org/download/windows/
+
+Para linux/wsl o passo a passo é o seguinte:
+
+```bash
+sudo apt install postgresql
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo -i -u postgres
+psql
+```
+No console do `psql` insira o comando abaixo substituindo o valor da senha desejada:
+```bash
+CREATE USER postgres WITH PASSWORD 'minha_senha';
+```
+
+> **ℹ️ Recapitulação**  
+> Esse é o valor que deverá ser atribuído à variável de ambiente POSTGRES_PASSWORD no arquivo `.env`
+
+Então finalize com:
+```bash
+\q
+exit
+```
+
+Execute o seguinte comando para criar o banco de dados:
+```bash
+python3 app/db/create_database.py # Linux/WSL
+python .\app\db\create_database.py # Windows
+```
+
+
 
 ## Adição de novas dependências
 
