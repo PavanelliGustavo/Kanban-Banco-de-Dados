@@ -1,18 +1,7 @@
-/*****************************************************************************
-Execute os seguintes comandos no terminal para criar a conexão com o banco:
-
-psql -U postgres
-
-CREATE DATABASE kanban_db;
-
-\c kanban_db;
-*****************************************************************************/
-
 CREATE TABLE tb_corporate (
     id SERIAL PRIMARY KEY,
     cnpj VARCHAR(14) NOT NULL,
-    user_name VARCHAR(100) NOT NULL,
-    company_name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL,
     email VARCHAR(120) NOT NULL UNIQUE,
     password VARCHAR(128) NOT NULL
 );
@@ -32,7 +21,7 @@ CREATE TABLE tb_location (
 
 CREATE TABLE tb_field_of_activity (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    name VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE tb_public_work (
