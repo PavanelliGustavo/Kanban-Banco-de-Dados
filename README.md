@@ -63,11 +63,16 @@ sudo apt install postgresql
 sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
 sudo -i -u postgres
+```
+
+Após o carregamento execute:
+```bash
 psql
 ```
+
 No console do `psql` insira o comando abaixo substituindo o valor da senha desejada:
 ```bash
-CREATE USER postgres WITH PASSWORD 'minha_senha';
+ALTER USER postgres WITH PASSWORD 'minha_senha';
 ```
 
 > **ℹ️ Recapitulação**  
@@ -81,11 +86,9 @@ exit
 
 Execute o seguinte comando para criar o banco de dados:
 ```bash
-python3 app/db/create_database.py # Linux/WSL
-python .\app\db\create_database.py # Windows
+python3 app/db/database_connection.py # Linux/WSL
+python .\app\db\database_connection.py # Windows
 ```
-
-
 
 ## Adição de novas dependências
 
