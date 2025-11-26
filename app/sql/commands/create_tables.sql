@@ -54,7 +54,7 @@ CREATE TABLE tb_card (
     deadline DATE NOT NULL,
     column_id INTEGER NOT NULL,
     corporate_id INTEGER NOT NULL,
-    FOREIGN KEY (column_id) REFERENCES tb_kanban_column (id) ON DELETE CASCADE,
+    FOREIGN KEY (column_id) REFERENCES tb_column (id) ON DELETE CASCADE, -- <- corrigido aqui
     FOREIGN KEY (corporate_id) REFERENCES tb_corporate (id) ON DELETE CASCADE
 );
 
