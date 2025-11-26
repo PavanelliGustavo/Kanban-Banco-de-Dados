@@ -41,21 +41,19 @@ CREATE TABLE tb_column (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     position INTEGER NOT NULL,
-    public_work_id INTEGER,
-    corporate_id INTEGER,
+    public_work_id INTEGER NOT NULL,
     FOREIGN KEY (public_work_id) REFERENCES tb_public_work (id) ON DELETE CASCADE,
-    FOREIGN KEY (corporate_id) REFERENCES tb_corporate (id) ON DELETE CASCADE
 );
 
 CREATE TABLE tb_card (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
+    position INTEGER NOT NULL,
     deadline DATE NOT NULL,
     column_id INTEGER NOT NULL,
-    corporate_id INTEGER NOT NULL,
-    FOREIGN KEY (column_id) REFERENCES tb_column (id) ON DELETE CASCADE, -- <- corrigido aqui
-    FOREIGN KEY (corporate_id) REFERENCES tb_corporate (id) ON DELETE CASCADE
+    public_work_id INTEGER NOT NULL,
+    FOREIGN KEY (column_id) REFERENCES tb_column (id) ON DELETE CASCADE,
 );
 
 CREATE TABLE tb_document (
