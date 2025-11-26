@@ -128,7 +128,7 @@ class Database:
         cls.execute(command)
 
     @classmethod
-    def insert(cls, into: str, data: dict) -> None:
+    def insert(cls, into: str, data: dict, returning: str | None = None) -> None | Any:
         """
         Insere um registro na tabela informada.
 
@@ -139,10 +139,15 @@ class Database:
         data : dict
             Mapeamento {coluna: valor}.
             Ex.: {"title": "Nova tarefa", "archived": False, "project_id": 3}
+        returning : Optional[str]
+            O nome de uma das colunas da tabela selecionada.
+            Útil para retornar IDs gerados automaticamente na inserção de um novo registro.
 
         Returns
         -------
-        None
+        None | Any
+            None se nenhum valor for especificado para returning.
+            Any a depender do tipo da coluna selecionada em returning.
 
         Raises
         ------
@@ -153,8 +158,17 @@ class Database:
         cols = ", ".join(data.keys())
         placeholders = ", ".join(["%s"] * len(data))
         query = f"INSERT INTO {into} ({cols}) VALUES ({placeholders})"
+        if returning:
+            query += f" RETURNING {returning}"
         cls.__cursor.execute(query, tuple(data.values()))
         cls.__connection.commit()
+
+        if not returning:
+            return
+
+        return_value = cls.__cursor.fetchone()
+        if return_value and len(return_value) > 0:
+            return return_value[0]
 
     @classmethod
     def select(cls, _from: str, columns: list[str] | None = None, where: str | None = None) -> list[tuple]:
