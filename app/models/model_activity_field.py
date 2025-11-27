@@ -1,9 +1,10 @@
-from app import db
+from app.db.database_connection import Database
+from app.models.model_template import Model
 
-class ActivityField(db.Model):
+class ActivityField(Model):
     # Model for the 'Activity Field' entity. Relates to Corporate (1,N).
 
-    __tablename__ = 'ActivityField'
+    TABLE_NAME = "ActivityField"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
@@ -14,3 +15,4 @@ class ActivityField(db.Model):
 
     def __repr__(self):
         return f'<ActivityField {self.id} - {self.name}>'
+
