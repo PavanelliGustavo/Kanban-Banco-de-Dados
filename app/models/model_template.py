@@ -1,0 +1,54 @@
+from app.db.database_connection import Database
+from abc import ABC, abstractmethod
+
+
+class Model(ABC):
+
+    """ Classe base para todos os modelos. Depende da implementação apropriada de getData() e da declaração da constante de classe TABLE_NAME."""
+
+    TABLE_NAME: str
+
+    def _addToDatabase(self):
+        """ Cria um registro no banco de dados com as informações da instância. Deve ser usado apenas uma vez e ao final do construtor da classe que herde de Model.
+            É dependente da implementação apropriada de getData()
+        """
+        if not all(self.getData().values()):
+            error = "Failed to add card to database: one or more required values are missing"
+            raise RuntimeError(error)
+
+        id = Database.insert(into=self.TABLE_NAME,
+                             data=self.getData(),
+                             returning="id")
+        if not id:
+            raise RuntimeError("Failed to retreive id from SQL insertion.")
+
+        self._id = int(id)
+
+    def _updateInDatabase(self):
+        """ Atualiza a linha do banco de dados referente à instância. Serve para sincronizar as informações do BD com as do objeto.
+            Deve ser usado ao final de todo método setter.
+        """
+        if not self.getId():
+            return
+        Database.update(table=self.TABLE_NAME,
+                        _with=self.getData(),
+                        where=f"id = {self.getId()}")
+
+    def delete(self):
+        Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")
+
+    def getId(self) -> int:
+        """ Retorna o id da instância """
+        return self._id
+
+    @abstractmethod
+    def getData(self) -> dict:
+        """ Deve retornar um dicionário cujas chaves são os nomes das colunas da tabela e os valores são os atributos de instância correspondentes.
+            Os nomes das colunas devem estar na mesma ordem em que aparecem no banco de dados.
+
+        >>> return {"coluna_1": self.getColuna1(),
+                        "coluna_2": self.getColuna2(),
+                        "coluna_3": self.getColuna3(),
+                        ...}
+        """
+        pass

@@ -1,13 +1,14 @@
 from app.db.database_connection import Database
+from app.models.model_template import Model
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 
-class Card:
+class Card(Model):
 
     MAX_DESCRIPTION_LENGTH: int = 1500
     MAX_TITLE_LENGTH: int = 255
-    TABLE_CARDS = "tb_card"
+    TABLE_NAME = "tb_card"
 
     def __init__(self,
                  title: str,
@@ -23,28 +24,7 @@ class Card:
         self.setDeadline(deadline)
         self.__setColumnId(column_id)
         self.__setPublicWorkId(public_work_id)
-        self.__addToDatabase()
-
-    def __addToDatabase(self):
-
-        if not all(self.getData().values()):
-            error = "Failed to add card to database: one or more required values are missing"
-            raise RuntimeError(error)
-
-        id = Database.insert(into=self.TABLE_CARDS,
-                             data=self.getData(),
-                             returning="id")
-        if not id:
-            raise RuntimeError("Failed to retreive id from SQL insertion.")
-
-        self.__id = int(id)
-
-    def __updateInDatabase(self):
-        if not self.getId():
-            return
-        Database.update(table=self.TABLE_CARDS,
-                        _with=self.getData(),
-                        where=f"id = {self.__id}")
+        self._addToDatabase()
 
     def __setColumnId(self, column_id: int):
         if not isinstance(column_id, int):
@@ -52,7 +32,7 @@ class Card:
         if column_id <= 0:
             raise ValueError("Card column_id must be greater than 0.")
         self.__column_id = column_id
-        self.__updateInDatabase()
+        self._updateInDatabase()
 
     def __setPublicWorkId(self, public_work_id: int):
         if not isinstance(public_work_id, int):
@@ -71,7 +51,7 @@ class Card:
             raise ValueError(error)
 
         self.__title = title
-        self.__updateInDatabase()
+        self._updateInDatabase()
 
     def setDescription(self, description: str):
 
@@ -83,7 +63,7 @@ class Card:
             raise ValueError(error)
 
         self.__description = description
-        self.__updateInDatabase()
+        self._updateInDatabase()
 
     def setPosition(self, position: int):
 
@@ -94,17 +74,14 @@ class Card:
             raise ValueError("Card position must be greater than 0.")
 
         self.__position = position
-        self.__updateInDatabase()
+        self._updateInDatabase()
 
     def setDeadline(self, deadline: date):
         if not isinstance(deadline, date):
             error = "Card deadline must be an instance of datetime.date."
             raise ValueError(error)
         self.__deadline = deadline
-        self.__updateInDatabase()
-
-    def getId(self) -> int:
-        return self.__id
+        self._updateInDatabase()
 
     def getData(self) -> dict:
         return {
@@ -146,4 +123,4 @@ class Card:
         self.setPosition(self.getPosition() + increment)
 
     def delete(self):
-        Database.delete(_from=self.TABLE_CARDS, where=f"id = {self.getId()}")
+        Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")
