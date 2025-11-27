@@ -1,9 +1,10 @@
-from app import db
+from app.db.database_connection import Database
+from app.models.model_template import Model
 
-class Location(db.Model):
+class Location(Model):
     # Model para a entidade Location, representado onde a Obra Pública ocorre
 
-    __tablename__ = 'Location'
+    TABLE_NAME = "Location"
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -13,3 +14,4 @@ class Location(db.Model):
 
     def __repr__(self):
         return f'<Location {self.id} - {self.address}>'
+
