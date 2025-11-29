@@ -248,23 +248,13 @@ class Database:
         psycopg2.Error
             Se a execução do comando falhar.
         """
-        if columns1:
-            cols1 = ", ".join([f"t1.{c}" for c in columns1])
-        else:
-            cols1 = "t1.*"
+        cols1 = cls.__formatColumnsParam(columns1)
+        cols2 = cls.__formatColumnsParam(columns2)
+        select_cols = cls.__formatColumnsToBeSelected([cols1, cols2])
 
-        if columns2:
-            cols2 = ", ".join([f"t2.{c}" for c in columns2])
-        else:
-            cols2 = "t2.*"
-
-        select_cols = f"{cols1}, {cols2}"
-
-        query = (
-            f"SELECT {select_cols} "
-            f"FROM {table1} t1 "
-            f"INNER JOIN {table2} t2 ON {on}"
-        )
+        query = (f"SELECT {select_cols} "
+                 f"FROM {table1} t1 "
+                 f"INNER JOIN {table2} t2 ON {on}")
 
         if where:
             query += f" WHERE {where}"
@@ -316,11 +306,17 @@ class Database:
             Se a execução do comando falhar.
         """
 
-        cols1 = f", t1.".join(columns1) if columns1 else "*"
-        cols2 = f", t2.".join(columns2) if columns2 else "*"
-        query = f"SELECT {cols1}, {cols2} FROM {table1} t1 CROSS JOIN {table2} t2"
+        cols1 = cls.__formatColumnsParam(columns1)
+        cols2 = cls.__formatColumnsParam(columns1)
+        selected_cols = cls.__formatColumnsToBeSelected([cols1, cols2])
+
+        query = (f"SELECT {selected_cols} "
+                 f"FROM {table1} t1 "
+                 f"CROSS JOIN {table2} t2")
+
         if where:
             query += f" WHERE {where}"
+
         cls.__cursor.execute(query)
         return cls.__cursor.fetchall()
 
@@ -328,6 +324,20 @@ class Database:
     def execute(cls, query: str):
         cls.__cursor.execute(query)
         cls.__connection.commit()
+
+    @classmethod
+    def __formatColumnsParam(columns: list[str]) -> str:
+        if columns is not None:
+            return ", ".join([f"t1.{c}" for c in columns])
+        else:
+            return ""
+
+    def __formatColumnsToBeSelected(columns: list[str]):
+        select_cols = ", ".join([col for col in columns if col])
+        if not select_cols.strip():
+            error = "Unable to perform select. At least one column must be specified"
+            raise ValueError(error)
+        return select_cols
 
     @classmethod
     def __toSQL(cls, value: Any) -> str:
