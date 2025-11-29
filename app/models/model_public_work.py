@@ -114,12 +114,12 @@ class PublicWork(Model):
         tb_public_work = cls.TABLE_NAME
         tb_location = Location.TABLE_NAME
 
-        public_works_attributes = Database.selectCrossJoin(table1=tb_public_work,
-                                                           table2=tb_location,
-                                                           columns2=[],
-                                                           where=f"t2.uf = '{uf}'")
+        rows = Database.selectInnerJoin(table1=tb_public_work,
+                                        table2=tb_location,
+                                        on=f"t1.uf = '{uf}'",
+                                        columns1=["*"])
 
-        return [cls.__init__(*attrs) for attrs in public_works_attributes]
+        return [PublicWork.instanceFromDatabaseRow(row) for row in rows]
 
     def getColumnsList(self) -> list[Card]:
         return self.__columns_list
@@ -129,13 +129,10 @@ class PublicWork(Model):
         tb_documents = Document.TABLE_NAME
         public_work_id_match = f"public_work_id = {self.getId()}"
 
-        documents_attributes = Database.select(_from=tb_documents,
-                                               where=public_work_id_match)
+        rows = Database.select(_from=tb_documents,
+                               where=public_work_id_match)
 
-        documents_list = [Document(*attrs)
-                          for attrs in documents_attributes]
-
-        return documents_list
+        return [Document.instanceFromDatabaseRow(row) for row in rows]
 
     def insertColumn(self, column: Column, position: int):
 
