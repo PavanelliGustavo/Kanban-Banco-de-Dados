@@ -1,4 +1,3 @@
-from app.db.database_connection import Database
 from app.models.model_template import Model
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
@@ -40,6 +39,7 @@ class Card(Model):
         if public_work_id <= 0:
             raise ValueError("Card public_work_id must be greater than 0.")
         self.__public_work_id = public_work_id
+        self._updateInDatabase()
 
     def setTitle(self, title: str):
 
@@ -115,12 +115,5 @@ class Card(Model):
         zone = ZoneInfo("America/Sao_Paulo")
         return datetime.now(zone).date() > self.getDeadline()
 
-    def moveTo(self, column_id: int, position: int):
-        self.__setColumnId(column_id)
-        self.setPosition(position)
-
     def incrementPosition(self, increment: int = 1):
         self.setPosition(self.getPosition() + increment)
-
-    def delete(self):
-        Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")

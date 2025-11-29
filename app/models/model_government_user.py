@@ -1,31 +1,55 @@
-from app import db
-from .user import AuthentincatedUser
+from .model_user import AuthenticatedUser
+from typing import Any
 
-class Government(AuthentincatedUser):
-    # Government model inherits from AutenticatedUser (Joined Table Inheritance)
+class Government(AuthenticatedUser):
 
-    __tablename__ = 'Government'
+    TABLE_NAME = "Government"
+    MAX_DEPARTMENT_LENGTH: int = 100
+    
+    def __init__(self,
+                 department_name: str,
+                 email: str,
+                 password: str,
+                 gov_id: int | None = None):
 
-    id = db.Column(db.Integer, db.ForeignKey('User.id'), primary_key=True) # Primary key and Foreign key to the 'User' table
+        super().__init__(email=email,
+                         password=password,
+                         user_id=gov_id)
+        
+        self.setDepartmentName(department_name, update_db=False)
 
-    # Atributos específicos do Governo
-    department_name = db.Column(db.String(100), nullable=False)
+        if gov_id is None:
+            self._addToDatabase()
+    
+    def getData(self) -> dict:
+        """ 
+        Assume que a ordem das colunas no DB é: department_name, email, password!!!!!!
+        """
+        data = self._getCommonData()
+        data["department_name"] = self.getDepartmentName()
+        return data
 
-    # Relacionamentos de Saída -> Government é a "fonte" da FK
+    @classmethod
+    def _fromDatabaseRow(cls, row: tuple) -> 'Government':
+        """ Converte uma linha do banco de dados (tupla) em uma instância de Government. """
+        
+        ''' Assumindo a ordem id, department_name, email, password'''
+        gov_id, department_name, email, password_hash = row 
+        
+        return cls(gov_id=gov_id, 
+                   department_name=department_name, 
+                   email=email, 
+                   password=password_hash)
 
-    # Government Signs Document (0,N)
-    signed_documents = db.relationship('Document', backref='signing_government', lazy='dynamic')
-    # A chave estrangeira será armazenada na tabela Document
-    ### RELAÇÃO 1:N. A FK TAMBÉM ESTÁ NO DOCUMENT
+    
+    def setDepartmentName(self, department_name: str, update_db: bool = True):
+        if not isinstance(department_name, str) or len(department_name.strip()) == 0:
+            raise ValueError("Department name must be a non-empty string.")
+        if len(department_name) > self.MAX_DEPARTMENT_LENGTH:
+            raise ValueError(f"Department name must be under {self.MAX_DEPARTMENT_LENGTH} characters.")
+        self.__department_name = department_name
+        if self._id and update_db:
+            self._updateInDatabase()
 
-    # Government Register Public Work (1,N)
-    registered_works = db.relationship('PublicWork', backref='registrant_government', lazy='dynamic')
-    # lazy='dynamic' permite buscr eficientemente a lista de obras registradas
-    ### RELAÇÃO 1:N. A FK ESTÁ NO PUBLICWORK
-
-    # Para o JTI:
-    __mapper_args__ = {'polymorphic_identity': 'government'}
-
-    def __repr__(self):
-        return f'<Government {self.id} - {self.department_name}>'
-
+    def getDepartmentName(self) -> str:
+        return self.__department_name
