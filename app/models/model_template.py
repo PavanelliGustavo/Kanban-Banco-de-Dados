@@ -1,3 +1,4 @@
+from typing import Iterable
 from app.db.database_connection import Database
 from abc import ABC, abstractmethod
 
@@ -41,6 +42,16 @@ class Model(ABC):
         Database.update(table=self.TABLE_NAME,
                         _with=self.getData(),
                         where=f"id = {self.getId()}")
+
+    @classmethod
+    def instanceFromDatabaseRow(cls, row: Iterable):
+        """Realiza o unpacking de um Iterable (listas, tuplas, etc), ou seja, passa os elementos do Iterable como argumentos individuais
+           para o construtor da classe e retorna uma instância.
+
+           Ex: Para um construtor `Construtor(valor1, valor2, valor3, valor4)` poderiamos
+           pegar uma `tupla = (a, b, c, d)` e chamar 'Construtor' da seguinte forma `Construtor(*tupla)`, que é equivalente a `Construtor(a, b, c, d)`
+        """
+        return cls(*row)
 
     def delete(self):
         Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")
