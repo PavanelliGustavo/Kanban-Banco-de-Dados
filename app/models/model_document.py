@@ -115,3 +115,6 @@ class Document(Model):
 
     def getCorporateId(self) -> int:
         return self.__corporate_id
+    
+    def delete(self):
+        Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")
