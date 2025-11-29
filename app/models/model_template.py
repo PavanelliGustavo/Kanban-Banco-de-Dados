@@ -41,6 +41,11 @@ class Model(ABC):
         """ Retorna o id da instância """
         return self._id
 
+    @classmethod
+    def getById(cls, id: int) -> "Model":
+        attrs = Database.select(_from=cls.TABLE_NAME, where=f"id = {id}")[0]
+        return cls.__init__(*attrs)
+
     @abstractmethod
     def getData(self) -> dict:
         """ Deve retornar um dicionário cujas chaves são os nomes das colunas da tabela e os valores são os atributos de instância correspondentes.

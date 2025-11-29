@@ -15,7 +15,7 @@ class Column(Model):
                  public_work_id: int) -> None:
 
         self.setName(name)
-        self.__setPosition(position)
+        self.setPosition(position)
         self.__setPublicWorkId(public_work_id)
         self.setCardsList()
         self._addToDatabase()
@@ -26,6 +26,7 @@ class Column(Model):
         if public_work_id <= 0:
             raise ValueError("Column public_work_id must be greater than 0.")
         self.__public_work_id = public_work_id
+        self._updateInDatabase()
 
     def setName(self, name: str):
 
@@ -39,7 +40,7 @@ class Column(Model):
         self.__name = name
         self._updateInDatabase()
 
-    def __setPosition(self, position: int):
+    def setPosition(self, position: int):
 
         if not isinstance(position, int):
             raise ValueError("Column position must be an integer.")
@@ -95,10 +96,13 @@ class Column(Model):
 
         new_position = {"position": f"position + {increment}"}
 
-        Database.update(tb_card, _with=new_position,
-                        where=f"column_id = {column_id} AND position >= {position}")
+        column_id_match = f"column_id = {column_id}"
+        position_is_more_or_equal = f"position >= {position}"
 
-    def addCard(self, title: str, description: str, position: int, deadline: date):
+        Database.update(tb_card, _with=new_position,
+                        where=f"{column_id_match} AND {position_is_more_or_equal}")
+
+    def insertCard(self, card: Card, position: int):
 
         if position < 1:
             position = 1
@@ -108,9 +112,6 @@ class Column(Model):
             position = one_after_last
 
         self.incrementAllCardPositionsFrom(position)
-
-        card = Card(title, description, position, deadline,
-                    self.getId(), self.getPublicWorkId())
 
         cards_list = self.getCardsList()
         cards_list.insert(position-1, card)
