@@ -58,16 +58,14 @@ class Location(Model):
         return {"address": self.getAddress()}
 
     @classmethod
-    def listAll(cls):
+    def listAll(cls) -> list["Location"]:
         tb_location = cls.TABLE_NAME
-        locations_attributes = Database.select(_from=tb_location)
-        locations = [cls.__init__(*attrs) for attrs in locations_attributes]
-        return locations
+        rows = Database.select(_from=tb_location)
+        return [cls.instanceFromDatabaseRow(row) for row in rows]
 
-    def listPublicWorks(self):
+    def listPublicWorks(self) -> list[PublicWork]:
         tb_public_work = PublicWork.TABLE_NAME
         location_match = f"id = {self.getId()}"
-        public_works_attributes = Database.select(_from=tb_public_work,
-                                                  where=location_match)
-
-        return [PublicWork(*attrs) for attrs in public_works_attributes]
+        rows = Database.select(_from=tb_public_work,
+                               where=location_match)
+        return [PublicWork.instanceFromDatabaseRow(row) for row in rows]
