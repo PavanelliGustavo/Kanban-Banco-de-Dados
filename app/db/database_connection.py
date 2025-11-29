@@ -1,8 +1,10 @@
+import logging
 import os
 from pathlib import Path
 from typing import Any
 import psycopg2
 from psycopg2.extensions import connection, cursor
+from psycopg2.errors import DuplicateDatabase
 from dotenv import load_dotenv
 
 
@@ -37,8 +39,9 @@ class Database:
 
         cls.__postgres_password = cls.__getPostgresPassword()
 
-        if not cls.__databaseExists(cls.DB_NAME):
-            cls.__createDatabase(cls.DB_NAME)
+        if not cls.__databaseExists():
+            cls.__createDatabase()
+        cls.__createTables()
 
         cls.__connection = cls.__connect(cls.DB_NAME)
         cls.__cursor = cls.__connection.cursor()
@@ -301,28 +304,40 @@ class Database:
             cls.__executeSqlFile(conn, cur, migration_file)
 
     @classmethod
-    def __databaseExists(cls, db_name: str) -> bool:
+    def __databaseExists(cls) -> bool:
         conn = cls.__connect("postgres")
         conn.autocommit = True
         cur = conn.cursor()
-        cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (db_name,))
+        cur.execute("SELECT 1 FROM pg_database WHERE datname = %s",
+                    [cls.DB_NAME])
         exists = cur.fetchone() is not None
         cur.close()
         conn.close()
         return exists
 
     @classmethod
-    def __createDatabase(cls, db_name: str):
-        conn = cls.__connect("postgres")
-        conn.autocommit = True
-        cur = conn.cursor()
-        cur.execute(f"CREATE DATABASE {db_name}")
-        cur.close()
-        conn.close()
+    def __createDatabase(cls):
+        try:
+            conn = cls.__connect("postgres")
+            conn.autocommit = True
+            cur = conn.cursor()
+            cur.execute(f"CREATE DATABASE {cls.DB_NAME}")
+        except DuplicateDatabase:
+            warning = "Attempted to create a database that already exists."
+            logging.warning(warning)
+        finally:
+            cur.close()
+            conn.close()
 
-        conn = cls.__connect(db_name)
-        cur = conn.cursor()
-        cls.__executeSqlFile(conn, cur, cls.CREATE_TABLES_FILE)
-        cls.__executeMigrations(conn, cur, cls.MIGRATIONS_DIR)
-        cur.close()
-        conn.close()
+    @classmethod
+    def __createTables(cls):
+        try:
+            conn = cls.__connect(cls.DB_NAME)
+            cur = conn.cursor()
+            cls.__executeSqlFile(conn, cur, cls.CREATE_TABLES_FILE)
+            cls.__executeMigrations(conn, cur, cls.MIGRATIONS_DIR)
+        except:
+            pass
+        finally:
+            cur.close()
+            conn.close()

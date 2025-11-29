@@ -28,7 +28,7 @@ class Model(ABC):
         """ Atualiza a linha do banco de dados referente à instância. Serve para sincronizar as informações do BD com as do objeto.
             Deve ser usado ao final de todo método setter.
         """
-        if not self.getId():
+        if not hasattr(self, "_id"):
             return
         Database.update(table=self.TABLE_NAME,
                         _with=self.getData(),

@@ -1,9 +1,1 @@
-from .model_user import User
-from .model_government_user import Government
-from .model_corporate_user import Corporate
-from .model_activity_field import ActivityField
-from .model_public_work import PublicWork
-from .model_location import Location
-from .model_column import Column
-from .model_card import Card
-from .model_document import Document
+
