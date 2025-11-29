@@ -8,6 +8,14 @@ class Model(ABC):
 
     TABLE_NAME: str
 
+    def pushDatabase(self):
+        """ Tenta atualizar o registro no banco de dados, se falhar, cria um novo registro
+        """
+        try:
+            self._updateInDatabase()
+        except:
+            self._addToDatabase()
+
     def _addToDatabase(self):
         """ Cria um registro no banco de dados com as informações da instância. Deve ser usado apenas uma vez e ao final do construtor da classe que herde de Model.
             É dependente da implementação apropriada de getData()
@@ -29,7 +37,7 @@ class Model(ABC):
             Deve ser usado ao final de todo método setter.
         """
         if not hasattr(self, "_id"):
-            return
+            raise RuntimeError("Unable to update, attribute _id is not set")
         Database.update(table=self.TABLE_NAME,
                         _with=self.getData(),
                         where=f"id = {self.getId()}")
