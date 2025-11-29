@@ -1,6 +1,7 @@
 from datetime import date
 from app.models.model_template import Model
 from app.models.model_card import Card
+from app.db.database_connection import Database
 
 
 class Column(Model):
@@ -72,7 +73,7 @@ class Column(Model):
         return self.__cards_list
 
     def getCard(self, position: int) -> Card:
-        if self.isValidPosition(position):
+        if not self.isValidPosition(position):
             error = "Unable to delete card, Position is out of bounds."
             raise ValueError(error)
 
@@ -85,11 +86,17 @@ class Column(Model):
         return 0 < position <= self.length()
 
     def incrementAllCardPositionsFrom(self, position: int, increment: int = 1):
+
         if not self.isValidPosition(position):
-            return
-        start = position - 1
-        for card in self.getCardsList()[start:]:
-            card.incrementPosition(increment)
+            raise ValueError("Provided 'position' value is out of bounds")
+
+        column_id = self.getId()
+        tb_card = Card.TABLE_NAME
+
+        new_position = {"position": f"position + {increment}"}
+
+        Database.update(tb_card, _with=new_position,
+                        where=f"column_id = {column_id} AND position >= {position}")
 
     def addCard(self, title: str, description: str, position: int, deadline: date):
 
@@ -108,9 +115,9 @@ class Column(Model):
         cards_list = self.getCardsList()
         cards_list.insert(position-1, card)
 
-        self.setCardsList()
+        self.setCardsList(cards_list)
 
-    def deleteCard(self, position: int):
+    def popCardAt(self, position: int):
 
         if not self.isValidPosition(position):
             error = "Unable to delete card, Position is out of bounds."
@@ -121,7 +128,8 @@ class Column(Model):
 
         index = position - 1
         card = cards_list[index]
-        card.delete()
 
         cards_list.remove(card)
         self.setCardsList(cards_list)
+
+        return card
