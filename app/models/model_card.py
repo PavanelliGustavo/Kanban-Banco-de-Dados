@@ -21,17 +21,15 @@ class Card(Model):
         self.setDescription(description)
         self.setPosition(position)
         self.setDeadline(deadline)
-        self.__setColumnId(column_id)
+        self.setColumnId(column_id)
         self.__setPublicWorkId(public_work_id)
-        self._addToDatabase()
 
-    def __setColumnId(self, column_id: int):
+    def setColumnId(self, column_id: int):
         if not isinstance(column_id, int):
             raise ValueError("Card column_id must be an integer.")
         if column_id <= 0:
             raise ValueError("Card column_id must be greater than 0.")
         self.__column_id = column_id
-        self._updateInDatabase()
 
     def __setPublicWorkId(self, public_work_id: int):
         if not isinstance(public_work_id, int):
@@ -39,7 +37,6 @@ class Card(Model):
         if public_work_id <= 0:
             raise ValueError("Card public_work_id must be greater than 0.")
         self.__public_work_id = public_work_id
-        self._updateInDatabase()
 
     def setTitle(self, title: str):
 
@@ -51,7 +48,6 @@ class Card(Model):
             raise ValueError(error)
 
         self.__title = title
-        self._updateInDatabase()
 
     def setDescription(self, description: str):
 
@@ -63,7 +59,6 @@ class Card(Model):
             raise ValueError(error)
 
         self.__description = description
-        self._updateInDatabase()
 
     def setPosition(self, position: int):
 
@@ -74,14 +69,12 @@ class Card(Model):
             raise ValueError("Card position must be greater than 0.")
 
         self.__position = position
-        self._updateInDatabase()
 
     def setDeadline(self, deadline: date):
         if not isinstance(deadline, date):
             error = "Card deadline must be an instance of datetime.date."
             raise ValueError(error)
         self.__deadline = deadline
-        self._updateInDatabase()
 
     def getData(self) -> dict:
         return {

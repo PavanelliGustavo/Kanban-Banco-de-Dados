@@ -3,6 +3,7 @@ from app.models.model_template import Model
 from app.models.model_card import Card
 from app.models.model_column import Column
 from app.models.model_document import Document
+from app.models.model_location import Location
 from app.db.database_connection import Database
 from datetime import date
 
@@ -106,6 +107,19 @@ class PublicWork(Model):
             "government_id": self.getGovernmentId(),
             "corporate_id": self.getCorporateId()
         }
+
+    @classmethod
+    def listByUf(cls, uf: str):
+
+        tb_public_work = cls.TABLE_NAME
+        tb_location = Location.TABLE_NAME
+
+        public_works_attributes = Database.selectCrossJoin(table1=tb_public_work,
+                                                           table2=tb_location,
+                                                           columns2=[],
+                                                           where=f"t2.uf = '{uf}'")
+
+        return [cls.__init__(*attrs) for attrs in public_works_attributes]
 
     def getColumnsList(self) -> list[Card]:
         return self.__columns_list

@@ -185,7 +185,7 @@ class Database:
             Lista de nomes de colunas a serem retornadas. Se `None`, usa `*`.
             Ex.: ["id", "title", "archived"]
         where : str, optional
-            Condição WHERE para filtragem. Ex.: "archived = FALSE".
+            Condição WHERE para filtragem.
             Se `None`, retorna todas as linhas.
 
         Returns
@@ -208,7 +208,77 @@ class Database:
         return cls.__cursor.fetchall()
 
     @classmethod
-    def selectCrossJoin(cls, table1: str, table2: str, columns1: list[str] | None = None, columns2: list[str] | None = None, where: str | None = None) -> list[tuple]:
+    def selectInnerJoin(cls,
+                        table1: str,
+                        table2: str,
+                        on: str,
+                        columns1: list[str] | None = None,
+                        columns2: list[str] | None = None,
+                        where: str | None = None) -> list[tuple]:
+        """
+        Executa um SELECT com INNER JOIN entre duas tabelas, com alias `t1` e `t2`.
+
+        Parameters
+        ----------
+        table1 : str
+            Nome da tabela principal (alias `t1`).
+        table2 : str
+            Nome da segunda tabela (alias `t2`), que será vinculada por INNER JOIN.
+        on : str
+            Condição ON para o INNER JOIN utilizando os aliases `t1` e `t2`.
+        columns1 : list of str, optional
+            Colunas de `table1` a retornar. Se `None`, usa `t1.*`.
+        columns2 : list of str, optional
+            Colunas de `table2` a retornar. Se `None`, usa `t2.*`.
+        where : str, optional
+            Condição WHERE aplicada ao resultado.
+            Ex.: "t2.uf = 'SP'"
+
+        Returns
+        -------
+        list of tuple
+            Linhas retornadas pelo banco.
+
+        Notes
+        -----
+        - Sempre utilize os aliases (`t1`, `t2`) nos parâmetros `on` e `where`.
+
+        Raises
+        ------
+        psycopg2.Error
+            Se a execução do comando falhar.
+        """
+        if columns1:
+            cols1 = ", ".join([f"t1.{c}" for c in columns1])
+        else:
+            cols1 = "t1.*"
+
+        if columns2:
+            cols2 = ", ".join([f"t2.{c}" for c in columns2])
+        else:
+            cols2 = "t2.*"
+
+        select_cols = f"{cols1}, {cols2}"
+
+        query = (
+            f"SELECT {select_cols} "
+            f"FROM {table1} t1 "
+            f"INNER JOIN {table2} t2 ON {on}"
+        )
+
+        if where:
+            query += f" WHERE {where}"
+
+        cls.__cursor.execute(query)
+        return cls.__cursor.fetchall()
+
+    @classmethod
+    def selectCrossJoin(cls,
+                        table1: str,
+                        table2: str,
+                        columns1: list[str] | None = None,
+                        columns2: list[str] | None = None,
+                        where: str | None = None) -> list[tuple]:
         """
         Executa um SELECT com CROSS JOIN entre duas tabelas, com alias `t1` e `t2`.
 

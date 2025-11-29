@@ -1,17 +1,73 @@
 from app.db.database_connection import Database
 from app.models.model_template import Model
+from app.models.model_public_work import PublicWork
+
 
 class Location(Model):
-    # Model para a entidade Location, representado onde a Obra Pública ocorre
 
-    TABLE_NAME = "Location"
+    TABLE_NAME = "tb_location"
+    MAX_ADDRESS_LENGTH = 255
+    MAX_CITY_LENGTH = 50
+    VALID_FEDERAL_UNITS = [
+        "AC", "AL", "AP", "AM", "BA", "CE",
+        "DF", "ES", "GO", "MA", "MT", "MS",
+        "MG", "PA", "PB", "PR", "PE", "PI",
+        "RJ", "RN", "RS", "RO", "RR", "SC",
+        "SP", "SE", "TO"
+    ]
 
-    id = db.Column(db.Integer, primary_key=True)
+    def __init__(self, uf: str, city: str, address: str, ):
+        self.__setUf(uf)
+        self.__setCity(city)
+        self.__setAddress(address)
 
-    address = db.Column(db.String(250), nullable=False)
+    def __setUf(self, uf: str):
+        if not uf in self.VALID_FEDERAL_UNITS:
+            raise ValueError("Ivalid UF")
+        self.__uf = uf
 
-    public_work = db.relationship('PublicWork', backref='work_location', uselist=False)
+    def __setCity(self, city):
+        if not isinstance(city, str):
+            raise ValueError("Location's city must be a string")
+        if len(city) > self.MAX_CITY_LENGTH:
+            error = f"Location's city length must be under {self.MAX_CITY_LENGTH}."
+            raise ValueError(error)
+        self.__city = city
 
-    def __repr__(self):
-        return f'<Location {self.id} - {self.address}>'
+    def __setAddress(self, address: str):
 
+        if not isinstance(address, str):
+            raise ValueError("Location's address must be a string.")
+
+        if len(address) > self.MAX_TITLE_LENGTH:
+            error = f"Location address length must be under {self.MAX_TITLE_LENGTH}."
+            raise ValueError(error)
+
+        self.__address = address
+
+    def getUf(self):
+        return self.__uf
+
+    def getCity(self):
+        return self.__city
+
+    def getAdress(self):
+        return self.__address
+
+    def getData(self):
+        return {"address": self.getAddress()}
+
+    @classmethod
+    def listAll(cls):
+        tb_location = cls.TABLE_NAME
+        locations_attributes = Database.select(_from=tb_location)
+        locations = [cls.__init__(*attrs) for attrs in locations_attributes]
+        return locations
+
+    def listPublicWorks(self):
+        tb_public_work = PublicWork.TABLE_NAME
+        location_match = f"id = {self.getId()}"
+        public_works_attributes = Database.select(_from=tb_public_work,
+                                                  where=location_match)
+
+        return [PublicWork(*attrs) for attrs in public_works_attributes]

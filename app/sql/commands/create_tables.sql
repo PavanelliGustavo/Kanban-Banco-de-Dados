@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS tb_government (
 
 CREATE TABLE IF NOT EXISTS tb_location (
     id SERIAL PRIMARY KEY,
+    uf VARCHAR(2) NOT NULL,
+    city VARCHAR(50) NOT NULL,
     address VARCHAR(255) NOT NULL
 );
 

@@ -17,8 +17,6 @@ class Column(Model):
         self.setName(name)
         self.setPosition(position)
         self.__setPublicWorkId(public_work_id)
-        self.setCardsList()
-        self._addToDatabase()
 
     def __setPublicWorkId(self, public_work_id: int):
         if not isinstance(public_work_id, int):
@@ -26,7 +24,6 @@ class Column(Model):
         if public_work_id <= 0:
             raise ValueError("Column public_work_id must be greater than 0.")
         self.__public_work_id = public_work_id
-        self._updateInDatabase()
 
     def setName(self, name: str):
 
@@ -38,7 +35,6 @@ class Column(Model):
             raise ValueError(error)
 
         self.__name = name
-        self._updateInDatabase()
 
     def setPosition(self, position: int):
 
@@ -49,10 +45,6 @@ class Column(Model):
             raise ValueError("Column position must be greater than 0.")
 
         self.__position = position
-        self._updateInDatabase()
-
-    def setCardsList(self, cards_list: list[Card] | None = None):
-        self.__cards_list = cards_list if cards_list else []
 
     def getData(self) -> dict:
         return {
@@ -71,7 +63,10 @@ class Column(Model):
         return self.__public_work_id
 
     def getCardsList(self) -> list[Card]:
-        return self.__cards_list
+        tb_card = Card.TABLE_NAME
+        column_match = f"column_id = {self.getId()}"
+        cards_attributes = Database.select(_from=tb_card, where=column_match)
+        return [Card(*attrs) for attrs in cards_attributes]
 
     def getCard(self, position: int) -> Card:
         if not self.isValidPosition(position):
@@ -99,7 +94,7 @@ class Column(Model):
         column_id_match = f"column_id = {column_id}"
         position_is_more_or_equal = f"position >= {position}"
 
-        Database.update(tb_card, _with=new_position,
+        Database.update(tb_card, _with={"position": new_position},
                         where=f"{column_id_match} AND {position_is_more_or_equal}")
 
     def insertCard(self, card: Card, position: int):
@@ -111,26 +106,11 @@ class Column(Model):
         if position > one_after_last:
             position = one_after_last
 
+        card.setColumnId(self.getId())
+        card.setPosition(position)
+        card._updateInDatabase()
+
         self.incrementAllCardPositionsFrom(position)
 
         cards_list = self.getCardsList()
         cards_list.insert(position-1, card)
-
-        self.setCardsList(cards_list)
-
-    def popCardAt(self, position: int):
-
-        if not self.isValidPosition(position):
-            error = "Unable to delete card, Position is out of bounds."
-            raise ValueError(error)
-
-        self.incrementAllCardPositionsFrom(position, increment=-1)
-        cards_list = self.getCardsList()
-
-        index = position - 1
-        card = cards_list[index]
-
-        cards_list.remove(card)
-        self.setCardsList(cards_list)
-
-        return card
