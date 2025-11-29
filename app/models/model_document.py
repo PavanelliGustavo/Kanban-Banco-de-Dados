@@ -1,125 +1,117 @@
 from app.db.database_connection import Database
 from app.models.model_template import Model
-from datetime import date, datetime
-from zoneinfo import ZoneInfo
+from datetime import date
 
 
 class Document(Model):
 
     MAX_TITLE_LENGTH: int = 255
+    MAX_FILE_SIZE_MB: int = 5
+    MAX_FILE_SIZE_BYTES: int = 5 * 1024 * 1024
     TABLE_NAME = "tb_document"
 
     def __init__(self,
                  title: str,
                  file_data: bytes,
                  upload_date: date,
-                 government_id: int,
                  public_work_id: int,
+                 government_id: int,
                  corporate_id: int) -> None:
 
         self.setTitle(title)
-        self.setFileData(position)
+        self.setFileData(file_data)
         self.setUploadDate(upload_date)
-        self.__setGovernmentId(government_id)
         self.__setPublicWorkId(public_work_id)
+        self.__setGovernmentId(government_id)
         self.__setCorporateId(corporate_id)
         self._addToDatabase()
 
-    def __setColumnId(self, column_id: int):
-        if not isinstance(column_id, int):
-            raise ValueError("Card column_id must be an integer.")
-        if column_id <= 0:
-            raise ValueError("Card column_id must be greater than 0.")
-        self.__column_id = column_id
+    def __setCorporateId(self, corporate_id: int):
+        if not isinstance(corporate_id, int):
+            raise ValueError("Document corporate_id must be an integer.")
+        if corporate_id <= 0:
+            raise ValueError("Document corporate_id must be greater than 0.")
+        self.__corporate_id = corporate_id
+        self._updateInDatabase()
+
+    def __setGovernmentId(self, government_id: int):
+        if not isinstance(government_id, int):
+            raise ValueError("Document government_id must be an integer.")
+        if government_id <= 0:
+            raise ValueError("Document government_id must be greater than 0.")
+        self.__government_id = government_id
         self._updateInDatabase()
 
     def __setPublicWorkId(self, public_work_id: int):
         if not isinstance(public_work_id, int):
-            raise ValueError("Card public_work_id must be an integer.")
+            raise ValueError("Document public_work_id must be an integer.")
         if public_work_id <= 0:
-            raise ValueError("Card public_work_id must be greater than 0.")
+            raise ValueError("Document public_work_id must be greater than 0.")
         self.__public_work_id = public_work_id
+        self._updateInDatabase()
 
     def setTitle(self, title: str):
 
         if not isinstance(title, str):
-            raise ValueError("Card title must be a string.")
+            raise ValueError("Document title must be a string.")
 
         if len(title) > self.MAX_TITLE_LENGTH:
-            error = f"Card title length must be under {self.MAX_TITLE_LENGTH}."
+            error = f"Document title length must be under {self.MAX_TITLE_LENGTH}."
             raise ValueError(error)
 
         self.__title = title
         self._updateInDatabase()
 
-    def setDescription(self, description: str):
+    def setFileData(self, file_data: bytes):
+        if not isinstance(file_data, bytes):
+            raise ValueError("Document file_data must be bytes.")
+        
+        if len(file_data) == 0:
+            raise ValueError("Document file_data cannot be empty.")
 
-        if not isinstance(description, str):
-            raise ValueError("Card description must be a string.")
-
-        if len(description) > self.MAX_DESCRIPTION_LENGTH:
-            error = f"Card description length must be under {self.MAX_DESCRIPTION_LENGTH}."
+        if len(file_data) > self.MAX_FILE_SIZE_BYTES:
+            error = (f"Document file_data size ({len(file_data)} bytes) exceeds the limit "
+                     f"of {self.MAX_FILE_SIZE_MB}MB ({self.MAX_FILE_SIZE_BYTES} bytes).")
             raise ValueError(error)
 
-        self.__description = description
+        self.__file_data = file_data
         self._updateInDatabase()
 
-    def setPosition(self, position: int):
+    def setUploadDate(self, upload_date: date):
 
-        if not isinstance(position, int):
-            raise ValueError("Card position must be an integer.")
+        if not isinstance(upload_date, date):
+            raise ValueError("Document upload_date must be an date.")
 
-        if position <= 0:
-            raise ValueError("Card position must be greater than 0.")
+        if upload_date > date.today():
+            raise ValueError("Document upload_date must be in the present or in the past.")
 
-        self.__position = position
-        self._updateInDatabase()
-
-    def setDeadline(self, deadline: date):
-        if not isinstance(deadline, date):
-            error = "Card deadline must be an instance of datetime.date."
-            raise ValueError(error)
-        self.__deadline = deadline
+        self.__upload_date = upload_date
         self._updateInDatabase()
 
     def getData(self) -> dict:
         return {
             "title": self.getTitle(),
-            "description": self.getDescription(),
-            "position": self.getPosition(),
-            "deadline": self.getDeadline(),
-            "column_id": self.getColumnId(),
-            "public_work_id": self.getPublicWorkId()
+            "File_data": self.getFileData(),
+            "Upload_date": self.getUploadDate(),
+            "public_work_id": self.getPublicWorkId(),
+            "government_id": self.getGovernmentId(),
+            "corporate_id": self.getCorporateId()
         }
 
     def getTitle(self) -> str:
         return self.__title
 
-    def getDescription(self) -> str:
-        return self.__description
+    def getFileData(self) -> bytes:
+        return self.__file_data
 
-    def getPosition(self) -> int:
-        return self.__position
-
-    def getDeadline(self) -> date:
-        return self.__deadline
-
-    def getColumnId(self) -> int:
-        return self.__column_id
-
+    def getUploadDate(self) -> date:
+        return self.__upload_date
+    
     def getPublicWorkId(self) -> int:
         return self.__public_work_id
 
-    def isLate(self) -> bool:
-        zone = ZoneInfo("America/Sao_Paulo")
-        return datetime.now(zone).date() > self.getDeadline()
+    def getGovernmentId(self) -> int:
+        return self.__government_id
 
-    def moveTo(self, column_id: int, position: int):
-        self.__setColumnId(column_id)
-        self.setPosition(position)
-
-    def incrementPosition(self, increment: int = 1):
-        self.setPosition(self.getPosition() + increment)
-
-    def delete(self):
-        Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")
+    def getCorporateId(self) -> int:
+        return self.__corporate_id
