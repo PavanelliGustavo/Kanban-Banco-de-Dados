@@ -62,21 +62,21 @@ class Column(Model):
     def getPublicWorkId(self) -> int:
         return self.__public_work_id
 
-    def getCardsList(self) -> list[Card]:
+    def listCards(self) -> list[Card]:
         tb_card = Card.TABLE_NAME
         column_match = f"column_id = {self.getId()}"
-        cards_attributes = Database.select(_from=tb_card, where=column_match)
-        return [Card(*attrs) for attrs in cards_attributes]
+        rows = Database.select(_from=tb_card, where=column_match)
+        return [Card.instanceFromDatabaseRow(row) for row in rows]
 
     def getCard(self, position: int) -> Card:
         if not self.isValidPosition(position):
             error = "Unable to delete card, Position is out of bounds."
             raise ValueError(error)
 
-        return self.getCardsList()[position-1]
+        return self.listCards()[position-1]
 
     def length(self) -> int:
-        return len(self.getCardsList())
+        return len(self.listCards())
 
     def isValidPosition(self, position: int) -> bool:
         return 0 < position <= self.length()
@@ -111,6 +111,3 @@ class Column(Model):
         card._updateInDatabase()
 
         self.incrementAllCardPositionsFrom(position)
-
-        cards_list = self.getCardsList()
-        cards_list.insert(position-1, card)

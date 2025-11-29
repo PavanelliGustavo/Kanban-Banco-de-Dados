@@ -1,5 +1,4 @@
 from app.models.model_user import AuthenticatedUser
-from typing import Any
 
 
 class Government(AuthenticatedUser):
@@ -10,17 +9,12 @@ class Government(AuthenticatedUser):
     def __init__(self,
                  department_name: str,
                  email: str,
-                 password: str,
-                 gov_id: int | None = None):
+                 password: str) -> None:
 
         super().__init__(email=email,
-                         password=password,
-                         user_id=gov_id)
+                         password=password)
 
-        self.setDepartmentName(department_name, update_db=False)
-
-        if gov_id is None:
-            self._addToDatabase()
+        self.setDepartmentName(department_name)
 
     def getData(self) -> dict:
         """ 
@@ -30,27 +24,13 @@ class Government(AuthenticatedUser):
         data["department_name"] = self.getDepartmentName()
         return data
 
-    @classmethod
-    def _fromDatabaseRow(cls, row: tuple) -> 'Government':
-        """ Converte uma linha do banco de dados (tupla) em uma instância de Government. """
-
-        ''' Assumindo a ordem id, department_name, email, password'''
-        gov_id, department_name, email, password_hash = row
-
-        return cls(gov_id=gov_id,
-                   department_name=department_name,
-                   email=email,
-                   password=password_hash)
-
-    def setDepartmentName(self, department_name: str, update_db: bool = True):
+    def setDepartmentName(self, department_name: str):
         if not isinstance(department_name, str) or len(department_name.strip()) == 0:
             raise ValueError("Department name must be a non-empty string.")
         if len(department_name) > self.MAX_DEPARTMENT_LENGTH:
             raise ValueError(
                 f"Department name must be under {self.MAX_DEPARTMENT_LENGTH} characters.")
         self.__department_name = department_name
-        if self._id and update_db:
-            self._updateInDatabase()
 
     def getDepartmentName(self) -> str:
         return self.__department_name
