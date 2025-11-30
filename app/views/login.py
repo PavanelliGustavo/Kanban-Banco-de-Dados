@@ -1,31 +1,156 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
-import logging
+from tkinter import messagebox
 
 
 class KanbanApp(tk.Tk):
 
-    # ---------------- WINDOW VARIABLES ----------------
+    # region ---------------- WINDOW VARIABLES ----------------
 
-    BACKGROWND_COLOR: str = "#f0f0f0"
+    BACKGROUND_COLOR: str = "#f0f0f0"
     DIMENSIONS = "600x500"
     START_AT_FULL_SCREEN = True
     TEXT_FONT = "Helvetica"
 
-    # ---------------------------------------------------
+    # endregion --------------------------------------------------
 
-    # ---------------- HEADER VARIABLES ----------------
+    # region ---------------- HEADER VARIABLES ----------------
+
+    HEADER_FRAME_PADDING = 40
 
     HEADER_TITLE_TEXT = "Kanban de Transparência"
     HEADER_TITLE_SIZE = 24
     HEADER_TITLE_STYLE = "bold"
     HEADER_TITLE_COLOR = "#333333"
+    HEADER_TITLE_PARAMS = {"text": HEADER_TITLE_TEXT,
+                           "font": (TEXT_FONT, HEADER_TITLE_SIZE, HEADER_TITLE_STYLE),
+                           "bg": BACKGROUND_COLOR,
+                           "fg": HEADER_TITLE_COLOR}
 
     HEADER_SUBTITLE_TEXT = "Selecione o seu perfil de acesso"
     HEADER_SUBTITLE_SIZE = 12
     HEADER_SUBTITLE_COLOR = "#666666"
+    HEADER_SUBTITLE_PADDING = 5
+    HEADER_SUBTITLE_PARAMS = {"text": HEADER_SUBTITLE_TEXT,
+                              "font": (TEXT_FONT, HEADER_SUBTITLE_SIZE),
+                              "bg": BACKGROUND_COLOR,
+                              "fg": HEADER_SUBTITLE_COLOR}
 
-    # ---------------------------------------------------
+    # endregion ---------------------------------------------------
+
+    # region ----------- USER TYPE BUTTON VARIABLES ------------
+
+    BUTTON_FONT_COLOR = "white"
+    BUTTON_COLOR_BY_USER_TYPE = {"civil": "#4CAF50",
+                                 "empresarial": "#2196F3",
+                                 "governamental": "#FF9800"}
+    BUTTON_EXTERNAL_PADDING = 10
+    BUTTON_INTERNAL_PADDING = 5
+    BUTTON_WIDTH = 15
+    BUTTON_FONT_SIZE = 10
+    BUTTON_FONT_STYLE = "bold"
+    BUTTON_CONFIG = {"width": BUTTON_WIDTH,
+                     "font": (TEXT_FONT, BUTTON_FONT_SIZE, BUTTON_FONT_STYLE),
+                     "pady": BUTTON_INTERNAL_PADDING}
+
+    # endregion ---------------------------------------------------
+
+    # region -------------- LOGIN AREA VARIABLES ---------------
+
+    LOGIN_AREA_FRAME_COLOR = "white"
+    LOGIN_AREA_BORDER_WIDTH = 1
+    LOGIN_AREA_BORDER_STYLE = "solid"
+    LOGIN_AREA_INTERNAL_HORIZONTAL_PADDING = 20
+    LOGIN_AREA_INTERNAL_VERTICAL_PADDING = 20
+    LOGIN_AREA_FRAME_PARAMS = {"bg": LOGIN_AREA_FRAME_COLOR,
+                               "bd": LOGIN_AREA_BORDER_WIDTH,
+                               "relief": LOGIN_AREA_BORDER_STYLE,
+                               "padx": LOGIN_AREA_INTERNAL_HORIZONTAL_PADDING,
+                               "pady": LOGIN_AREA_INTERNAL_VERTICAL_PADDING}
+
+    LOGIN_AREA_EXTERNAL_HORIZONTAL_PADDING = 100
+    LOGIN_AREA_EXTERNAL_VERTICAL_PADDING = 20
+    LOGIN_AREA_FILL_METHOD = "x"
+    LOGIN_AREA_FRAME_PACK_PARAMS = {"pady": LOGIN_AREA_EXTERNAL_VERTICAL_PADDING,
+                                    "fill": LOGIN_AREA_FILL_METHOD,
+                                    "padx": LOGIN_AREA_EXTERNAL_HORIZONTAL_PADDING}
+
+    LOGIN_AREA_LABEL_TEXT = "Selecione uma opção acima para continuar."
+    LOGIN_AREA_LABEL_FONT_COLOR = "#888"
+    LOGIN_AREA_LABEL_PARAMS = {"text": LOGIN_AREA_LABEL_TEXT,
+                               "bg": LOGIN_AREA_FRAME_COLOR,
+                               "fg": LOGIN_AREA_LABEL_FONT_COLOR}
+
+    # endregion ---------------------------------------------------
+
+    # region ------------- LOGIN CONTENT VARIABLES --------------
+
+    LOGIN_CONTENT_TITLE_BACKGROUND_COLOR = "white"
+    LOGIN_CONTENT_TITLE_FONT_COLOR = "#333"
+
+    LOGIN_CONTENT_TITLE_BY_USER_TYPE = {"civil": "Acesso Cidadão",
+                                        "empresarial": "Acesso Corporativo",
+                                        "governamental": "Acesso Administrativo"}
+    LOGIN_CONTENT_TITLE_FONT_SIZE = 14
+    LOGIN_CONTENT_TITLE_FONT_STYLE = "bold"
+
+    LOGIN_CONTENT_TITLE_PARAMS = {"font": (TEXT_FONT,
+                                           LOGIN_CONTENT_TITLE_FONT_SIZE,
+                                           LOGIN_CONTENT_TITLE_FONT_STYLE),
+                                  "bg": LOGIN_CONTENT_TITLE_BACKGROUND_COLOR,
+                                  "fg": LOGIN_CONTENT_TITLE_FONT_COLOR}
+
+    LOGIN_CONTENT_TITLE_PACK_VERTICAL_PADDING = (0, 15)
+
+    # endregion ---------------------------------------------------
+
+    # region -------------- CIVIL USER VARIABLES ----------------
+
+    CIVIL_USER_LABEL_TEXT = "Visualize o andamento das obras públicas\nsem necessidade de cadastro."
+    CIVIL_USER_LABEL_BACKGROUND_COLOR = "white",
+    CIVIL_USER_LABEL_JUSTIFY = "center"
+    CIVIL_USER_LABEL_PARAMS = {"text": CIVIL_USER_LABEL_TEXT,
+                               "bg": CIVIL_USER_LABEL_BACKGROUND_COLOR,
+                               "justify": CIVIL_USER_LABEL_JUSTIFY}
+    CIVIL_USER_LABEL_PACK_VERTICAL_PADDING = 10
+
+    CIVIL_USER_BUTTON_TEXT = "ENTRAR NO SISTEMA"
+    CIVIL_USER_BUTTON_TEXT_SIZE = 11
+    CIVIL_USER_BUTTON_TEXT_STYLE = "bold"
+    CIVIL_USER_BUTTON_TEXT_COLOR = "white"
+    CIVIL_USER_BUTTON_WIDTH = 20
+    CIVIL_USER_BUTTON_BACKGROUND_COLOR = "#4CAF50"
+
+    CIVIL_USER_BUTTON_PARAMS = {"text": CIVIL_USER_BUTTON_TEXT,
+                                "bg": CIVIL_USER_BUTTON_BACKGROUND_COLOR,
+                                "fg": CIVIL_USER_BUTTON_TEXT_COLOR,
+                                "font": (TEXT_FONT, CIVIL_USER_BUTTON_TEXT_SIZE, CIVIL_USER_BUTTON_TEXT_STYLE),
+                                "width": CIVIL_USER_BUTTON_WIDTH}
+    CIVIL_USER_BUTTON_PACK_VERTICAL_PADDING = 10
+
+    # endregion ---------------------------------------------------
+
+    # region ------------- LOGIN FIELDS VARIABLES ---------------
+
+    LOGIN_FIELD_LABEL_BACKGROUND_COLOR = "white"
+    LOGIN_FILED_LABEL_ANCHOR = "w"
+    LOGIN_FIELD_LABEL_PACK_FILL = "x"
+
+    LOGIN_FIELD_INPUT_PACK_FILL = "x"
+    LOGIN_FIELD_EMAIL_PACK_VERTICAL_PADDING = (0, 10)
+    LOGIN_FIELD_PASSWORD_PACK_VERTICAL_PADDING = (0, 15)
+
+    LOGIN_FIELD_BUTTON_WIDTH = 20
+    LOGIN_FIELD_BUTTON_TEXT = "AUTENTICAR"
+    LOGIN_FIELD_BUTTON_TEXT_COLOR = "white"
+    LOGIN_FIELD_BUTTON_FONT_SIZE = 11
+    LOGIN_FIELD_BUTTON_FONT_STYLE = "bold"
+    LOGIN_FIELD_BUTTON_PARAMS = {"text": LOGIN_FIELD_BUTTON_TEXT,
+                                 "fg": LOGIN_FIELD_BUTTON_TEXT_COLOR,
+                                 "font": (TEXT_FONT, LOGIN_FIELD_BUTTON_FONT_SIZE, LOGIN_FIELD_BUTTON_FONT_STYLE),
+                                 "width": LOGIN_FIELD_BUTTON_WIDTH}
+    LOGIN_FIELD_BUTTON_PACK_VERTICAL_PADDING = 5
+
+    # endregion ---------------------------------------------------
 
     def __init__(self):
 
@@ -34,189 +159,143 @@ class KanbanApp(tk.Tk):
         self.title("Kanban de Transparência - Obras Públicas")
         self.geometry(self.DIMENSIONS)
         self.attributes("-zoomed", self.START_AT_FULL_SCREEN)
-        self.configure(bg=self.BACKGROWND_COLOR)
+        self.configure(bg=self.BACKGROUND_COLOR)
 
         self.user_type = tk.StringVar(value="")
 
-        self.create_widgets()
+        self.createWidgets()
 
     def setUpHeader(self):
-        header_frame = tk.Frame(self, bg=self.BACKGROWND_COLOR)
-        header_frame.pack(pady=40)
+        header_frame = tk.Frame(self, bg=self.BACKGROUND_COLOR)
+        header_frame.pack(pady=self.HEADER_FRAME_PADDING)
 
-        title_label = tk.Label(header_frame, text=self.HEADER_TITLE_TEXT,
-                               font=(self.TEXT_FONT, self.HEADER_TITLE_SIZE,
-                                     self.HEADER_TITLE_STYLE),
-                               bg=self.BACKGROWND_COLOR, fg=self.HEADER_TITLE_COLOR)
+        title_label = tk.Label(header_frame, **self.HEADER_TITLE_PARAMS)
         title_label.pack()
 
-        subtitle_label = tk.Label(header_frame, text=self.HEADER_SUBTITLE_TEXT,
-                                  font=(self.TEXT_FONT,
-                                        self.HEADER_SUBTITLE_SIZE),
-                                  bg=self.BACKGROWND_COLOR,
-                                  fg=self.HEADER_SUBTITLE_COLOR)
-        subtitle_label.pack(pady=5)
+        subtitle_label = tk.Label(header_frame, **self.HEADER_SUBTITLE_PARAMS)
+        subtitle_label.pack(pady=self.HEADER_SUBTITLE_PADDING)
 
-    def create_widgets(self):
-        # --- Cabeçalho ---
-        header_frame = tk.Frame(self, bg=self.BACKGROWND_COLOR)
-        header_frame.pack(pady=40)
+    def setUpAllUserTypeButtons(self):
 
-        title_label = tk.Label(
-            header_frame,
-            text="Kanban de Transparência",
-            font=(self.TEXT_FONT, 24, "bold"),
-            bg=self.BACKGROWND_COLOR,
-            fg="#333333"
-        )
-        title_label.pack()
-
-        subtitle_label = tk.Label(
-            header_frame,
-            text="Selecione o seu perfil de acesso",
-            font=(self.TEXT_FONT, 12),
-            bg=self.BACKGROWND_COLOR,
-            fg="#666666"
-        )
-        subtitle_label.pack(pady=5)
-
-        # --- Botões de Tipo de Usuário ---
-        buttons_frame = tk.Frame(self, bg=self.BACKGROWND_COLOR)
+        buttons_frame = tk.Frame(self, bg=self.BACKGROUND_COLOR)
         buttons_frame.pack(pady=20)
 
-        # Estilo dos botões
-        btn_config = {'width': 15, 'font': (
-            self.TEXT_FONT, 10, "bold"), 'pady': 5}
+        self.setUpUserTypeButton(buttons_frame, "civil", position=0)
+        self.setUpUserTypeButton(buttons_frame, "empresarial", position=1)
+        self.setUpUserTypeButton(buttons_frame, "governamental", position=2)
 
-        self.btn_civil = tk.Button(
-            buttons_frame,
-            text="CIVIL",
-            command=lambda: self.setup_login_area("civil"),
-            bg="#4CAF50", fg="white", **btn_config
-        )
-        self.btn_civil.grid(row=0, column=0, padx=10)
+    def setUpUserTypeButton(self, frame: tk.Frame, user_type: str, position: int):
 
-        self.btn_empresa = tk.Button(
-            buttons_frame,
-            text="EMPRESARIAL",
-            command=lambda: self.setup_login_area("empresa"),
-            bg="#2196F3", fg="white", **btn_config
-        )
-        self.btn_empresa.grid(row=0, column=1, padx=10)
+        def command(): return self.customizeLogin(user_type)
 
-        self.btn_gov = tk.Button(
-            buttons_frame,
-            text="GOVERNAMENTAL",
-            command=lambda: self.setup_login_area("governo"),
-            bg="#FF9800", fg="white", **btn_config
-        )
-        self.btn_gov.grid(row=0, column=2, padx=10)
+        button_name = f"btn_{user_type}"
+        button_value = tk.Button(frame, text=user_type.upper(), command=command,
+                                 bg=self.BUTTON_COLOR_BY_USER_TYPE[user_type],
+                                 fg=self.BUTTON_FONT_COLOR, **self.BUTTON_CONFIG)
 
-        # --- Área Dinâmica de Login (Muda conforme o clique) ---
-        self.login_area_frame = tk.Frame(
-            self, bg="white", bd=1, relief="solid", padx=20, pady=20)
-        self.login_area_frame.pack(pady=20, fill="x", padx=100)
+        setattr(self, button_name, button_value)
+        btn = getattr(self, button_name)
+        getattr(btn, "grid")(row=0, column=position,
+                             padx=self.BUTTON_EXTERNAL_PADDING)
 
-        # Label inicial de instrução
-        self.lbl_instruction = tk.Label(
-            self.login_area_frame,
-            text="Selecione uma opção acima para continuar.",
-            bg="white", fg="#888"
-        )
-        self.lbl_instruction.pack()
+    def setUpLoginArea(self):
+        self.login_area_frame = tk.Frame(self, **self.LOGIN_AREA_FRAME_PARAMS)
+        self.login_area_frame.pack(**self.LOGIN_AREA_FRAME_PACK_PARAMS)
 
-    def setup_login_area(self, user_type):
-        """Limpa a área de login e desenha os campos baseados no tipo de usuário"""
-        self.user_type.set(user_type)
+        self.login_area_label = tk.Label(self.login_area_frame,
+                                         **self.LOGIN_AREA_LABEL_PARAMS)
+        self.login_area_label.pack()
 
-        # Limpar widgets anteriores da área de login
+    def createWidgets(self):
+        self.setUpHeader()
+        self.setUpAllUserTypeButtons()
+        self.setUpLoginArea()
+
+    def clearWidgets(self):
         for widget in self.login_area_frame.winfo_children():
             widget.destroy()
 
-        # Título da seção de login
-        role_titles = {
-            "civil": "Acesso Cidadão",
-            "empresa": "Acesso Corporativo",
-            "governo": "Acesso Administrativo"
-        }
+    def customizeLoginContentTitle(self, user_type: str):
+        title = tk.Label(self.login_area_frame,
+                         text=self.LOGIN_CONTENT_TITLE_BY_USER_TYPE[user_type],
+                         **self.LOGIN_CONTENT_TITLE_PARAMS)
+        title.pack(pady=self.LOGIN_CONTENT_TITLE_PACK_VERTICAL_PADDING)
 
-        lbl_role = tk.Label(
-            self.login_area_frame,
-            text=role_titles.get(user_type),
-            font=(self.TEXT_FONT, 14, "bold"),
-            bg="white", fg="#333"
-        )
-        lbl_role.pack(pady=(0, 15))
+    def civilUserLogin(self):
+        label = tk.Label(self.login_area_frame,
+                         **self.CIVIL_USER_LABEL_PARAMS)
+
+        label.pack(pady=self.CIVIL_USER_LABEL_PACK_VERTICAL_PADDING)
+
+        button = tk.Button(self.login_area_frame, command=self.performLogin,
+                           **self.CIVIL_USER_BUTTON_PARAMS)
+
+        button.pack(pady=self.CIVIL_USER_BUTTON_PACK_VERTICAL_PADDING)
+
+    def nonCivilUserLogin(self, user_type: str):
+
+        self.showField("email")
+        v_padding = self.LOGIN_FIELD_EMAIL_PACK_VERTICAL_PADDING
+        email = self.captureFieldInput(v_padding)
+
+        self.showField("senha")
+        v_padding = self.LOGIN_FIELD_PASSWORD_PACK_VERTICAL_PADDING
+        password = self.captureFieldInput(v_padding, show="*")
+
+        def command(): return self.performLogin(email, password)
+
+        btn_color = self.BUTTON_COLOR_BY_USER_TYPE[user_type]
+
+        btn_login = tk.Button(self.login_area_frame, command=command,
+                              bg=btn_color, **self.LOGIN_FIELD_BUTTON_PARAMS)
+
+        btn_login.pack(pady=self.LOGIN_FIELD_BUTTON_PACK_VERTICAL_PADDING)
+
+    def showField(self, name: str):
+        field_label = tk.Label(self.login_area_frame, text=f"{name}: ",
+                               bg=self.LOGIN_FIELD_LABEL_BACKGROUND_COLOR,
+                               anchor=self.LOGIN_FILED_LABEL_ANCHOR)
+        field_label.pack(fill=self.LOGIN_FIELD_LABEL_PACK_FILL)
+
+    def captureFieldInput(self, vertical_padding: int | tuple[int], show: str = "") -> str:
+        input = tk.Entry(self.login_area_frame, show=show)
+        input.pack(fill=self.LOGIN_FIELD_INPUT_PACK_FILL,
+                   pady=vertical_padding)
+        return input
+
+    def customizeLogin(self, user_type):
+
+        self.user_type.set(user_type)
+        self.clearWidgets()
+        self.customizeLoginContentTitle(user_type)
 
         if user_type == "civil":
-            # --- Fluxo CIVIL: Acesso direto ---
-            lbl_info = tk.Label(
-                self.login_area_frame,
-                text="Visualize o andamento das obras públicas\nsem necessidade de cadastro.",
-                bg="white", justify="center"
-            )
-            lbl_info.pack(pady=10)
+            self.civilUserLogin()
+        else:
+            self.nonCivilUserLogin(user_type)
 
-            btn_enter = tk.Button(
-                self.login_area_frame,
-                text="ENTRAR NO SISTEMA",
-                command=self.perform_login,
-                bg="#4CAF50", fg="white", font=(self.TEXT_FONT, 11, "bold"), width=20
-            )
-            btn_enter.pack(pady=10)
+    def performLogin(self, email: tk.Entry | None = None, password: tk.Entry | None = None):
+
+        user_type = self.user_type.get()
+
+        if user_type == "civil":
+            info = "Sucesso", "Bem-vindo, Cidadão! Carregando Kanban público..."
+            messagebox.showinfo(info)
+            # fluxo do usuario civil
 
         else:
-            # --- Fluxo EMPRESA ou GOVERNO: Exige autenticação ---
+            email_value = email.get()
+            password_value = password.get()
 
-            # Campo E-mail
-            tk.Label(self.login_area_frame, text="E-mail:",
-                     bg="white", anchor="w").pack(fill="x")
-            self.entry_email = tk.Entry(self.login_area_frame)
-            self.entry_email.pack(fill="x", pady=(0, 10))
-            b = self.entry_email.get()
-            logging.info(b)
+            # validação de email e senha
 
-            # Campo Senha
-            tk.Label(self.login_area_frame, text="Senha:",
-                     bg="white", anchor="w").pack(fill="x")
-            self.entry_password = tk.Entry(self.login_area_frame, show="*")
-            self.entry_password.pack(fill="x", pady=(0, 15))
-            a = self.entry_password.get()
-            logging.info(a)
-
-            # Botão de Login
-            btn_color = "#2196F3" if user_type == "empresa" else "#FF9800"
-            btn_login = tk.Button(
-                self.login_area_frame,
-                text="AUTENTICAR",
-                command=self.perform_login,
-                bg=btn_color, fg="white", font=(self.TEXT_FONT, 11, "bold"), width=20
-            )
-            btn_login.pack(pady=5)
-
-    def perform_login(self):
-        """Simula a ação de entrar no sistema"""
-        u_type = self.user_type.get()
-
-        if u_type == "civil":
-            messagebox.showinfo(
-                "Sucesso", "Bem-vindo, Cidadão! Carregando Kanban público...")
-            # Aqui chamaremos a tela do Kanban Civil futuramente
-
-        else:
-            # Validação simples para exemplo
-            email = self.entry_email.get()
-            senha = self.entry_password.get()
-
-            if not email or not senha:
-                messagebox.showwarning(
-                    "Atenção", "Por favor, preencha e-mail e senha.")
+            if not email_value or not password_value:
+                warning = "Atenção", "Por favor, preencha e-mail e senha."
+                messagebox.showwarning(warning)
                 return
 
-            # Simulação de verificação
-            messagebox.showinfo(
-                "Login", f"Tentando login como {u_type.upper()}...\nE-mail: {email}")
-            # Aqui validaremos no banco de dados futuramente
+            info = "Login", f"Tentando login como {user_type.upper()}...\nE-mail: {email_value}"
+            messagebox.showinfo(info)
 
 
 if __name__ == "__main__":
