@@ -1,7 +1,7 @@
-from app.views.login import LoginScreen
+from app.views.app import App
 from app.db.database_connection import Database
 
 Database.setUp()
-app = LoginScreen()
+app = App()
 app.mainloop()
 Database.tearDown()

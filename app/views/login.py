@@ -6,14 +6,11 @@ from app.models.model_government_user import Government
 from app.models.model_user import AuthenticatedUser
 
 
-class LoginScreen(tk.Tk):
+class LoginScreen(tk.Frame):
 
     # region ---------------- WINDOW VARIABLES ----------------
 
-    WINDOW_TITLE_TEXT = "Kanban de Transparência - Obras Públicas"
     WINDOW_BACKGROUND_COLOR: str = "#f0f0f0"
-    WINDOW_DIMENSIONS = "600x500"
-    WINDOW_START_AT_FULL_SCREEN = True
     TEXT_FONT = "Helvetica"
 
     # endregion --------------------------------------------------
@@ -157,17 +154,13 @@ class LoginScreen(tk.Tk):
 
     # endregion ---------------------------------------------------
 
-    def __init__(self):
+    def __init__(self, parent, controller):
 
-        super().__init__()
+        super().__init__(parent)
+        self.controller = controller
 
-        self.title(self.WINDOW_TITLE_TEXT)
-        self.geometry(self.WINDOW_DIMENSIONS)
-        self.attributes("-zoomed", self.WINDOW_START_AT_FULL_SCREEN)
         self.configure(bg=self.WINDOW_BACKGROUND_COLOR)
-
         self.user_type = tk.StringVar(value="")
-
         self.createWidgets()
 
     def setUpHeader(self):
@@ -292,8 +285,7 @@ class LoginScreen(tk.Tk):
             self.nonCivilValidation(email, password, user_type_constructor)
 
     def civilValidation(self):
-        info = "Sucesso", "Bem-vindo, Cidadão! Carregando Kanban público..."
-        messagebox.showinfo(*info)
+        self.controller.show_frame("CompaniesSearchScreen")
 
     def nonCivilValidation(self, email: str | None, password: str | None, user_type: Type[AuthenticatedUser]):
         if not email or not password:
@@ -314,8 +306,3 @@ class LoginScreen(tk.Tk):
 
         info = "Sucesso", "Login bem sucedido! Entrando na aplicação..."
         messagebox.showinfo(*info)
-
-
-if __name__ == "__main__":
-    app = LoginScreen()
-    app.mainloop()

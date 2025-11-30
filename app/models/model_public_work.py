@@ -122,13 +122,6 @@ class PublicWork(Model):
 
         return [PublicWork.instanceFromDatabaseRow(row) for row in rows]
 
-    def listActivityFields(self):
-        tb_public_work_field_of_activity = "tb_public_work_field_of_activity"
-        public_work_match = f"public_work_id = {self.getId()}"
-        rows = Database.select(_from=tb_public_work_field_of_activity,
-                               where=public_work_match)
-        return [ActivityField.instanceFromDatabaseRow(row) for row in rows]
-
     def getColumnsList(self) -> list[Card]:
         return self.__columns_list
 

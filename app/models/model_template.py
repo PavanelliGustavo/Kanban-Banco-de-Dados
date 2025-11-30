@@ -61,6 +61,12 @@ class Model(ABC):
         return self._id
 
     @classmethod
+    def listAll(cls) -> list["Model"]:
+        tb = cls.TABLE_NAME
+        rows = Database.select(_from=tb)
+        return [cls.instanceFromDatabaseRow(row) for row in rows]
+
+    @classmethod
     def getById(cls, id: int) -> "Model":
         attrs = Database.select(_from=cls.TABLE_NAME, where=f"id = {id}")[0]
         return cls.__init__(*attrs)

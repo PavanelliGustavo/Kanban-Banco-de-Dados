@@ -29,23 +29,3 @@ class ActivityField(Model):
 
     def getName(self) -> str:
         return self.__name
-
-    @classmethod
-    def listAll(cls) -> list["ActivityField"]:
-        tb_ActivityField = cls.TABLE_NAME
-        rows = Database.select(_from=tb_ActivityField)
-        return [cls.instanceFromDatabaseRow(row) for row in rows]
-
-    def listPublicWorks(self) -> list[PublicWork]:
-        tb_corporate_field_of_activity = "tb_corporate_field_of_activity"
-        field_of_activity_match = f"field_of_activity_id = {self.getId()}"
-        rows = Database.select(_from=tb_corporate_field_of_activity,
-                               where=field_of_activity_match)
-        return [PublicWork.instanceFromDatabaseRow(row) for row in rows]
-
-    def listCorporates(self) -> list[Corporate]:
-        tb_public_work_field_of_activity = "tb_public_work_field_of_activity"
-        field_of_activity_match = f"field_of_activity_id = {self.getId()}"
-        rows = Database.select(_from=tb_public_work_field_of_activity,
-                               where=field_of_activity_match)
-        return [Corporate.instanceFromDatabaseRow(row) for row in rows]

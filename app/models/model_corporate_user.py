@@ -1,5 +1,3 @@
-from app.db.database_connection import Database
-from app.models.model_activity_field import ActivityField
 from app.models.model_user import AuthenticatedUser
 
 
@@ -50,10 +48,3 @@ class Corporate(AuthenticatedUser):
 
     def getCnpj(self) -> str:
         return self.__cnpj
-
-    def listActivityFields(self):
-        tb_corporate_field_of_activity = "tb_corporate_field_of_activity"
-        corporate_match = f"corporate_id = {self.getId()}"
-        rows = Database.select(_from=tb_corporate_field_of_activity,
-                               where=corporate_match)
-        return [ActivityField.instanceFromDatabaseRow(row) for row in rows]
