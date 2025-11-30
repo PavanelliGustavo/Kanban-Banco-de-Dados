@@ -51,7 +51,7 @@ class Model(ABC):
            Ex: Para um construtor `Construtor(valor1, valor2, valor3, valor4)` poderiamos
            pegar uma `tupla = (a, b, c, d)` e chamar 'Construtor' da seguinte forma `Construtor(*tupla)`, que é equivalente a `Construtor(a, b, c, d)`
         """
-        return cls(*row)
+        return cls(*row[1:])
 
     def delete(self):
         Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")
