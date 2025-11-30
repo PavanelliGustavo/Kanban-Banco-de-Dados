@@ -2,13 +2,14 @@ import tkinter as tk
 from login import LoginFrame
 from empresas_civil import EmpresasCivilFrame
 from obras_empresa import ObrasEmpresaFrame
-from kanban_view import KanbanViewFrame # Importando a nova tela
+from kanban_view import KanbanViewFrame
+from docs_view import DocsViewFrame # Importando nova view
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Kanban de Transparência")
-        self.geometry("1000x700") # Aumentei um pouco para caber o Kanban
+        self.geometry("1000x700")
         
         self.container = tk.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
@@ -31,6 +32,9 @@ class App(tk.Tk):
         self.frames["KanbanViewFrame"] = KanbanViewFrame(parent=self.container, controller=self)
         self.frames["KanbanViewFrame"].grid(row=0, column=0, sticky="nsew")
 
+        self.frames["DocsViewFrame"] = DocsViewFrame(parent=self.container, controller=self)
+        self.frames["DocsViewFrame"].grid(row=0, column=0, sticky="nsew")
+
         self.show_frame("LoginFrame")
 
     def show_frame(self, page_name):
@@ -43,8 +47,13 @@ class App(tk.Tk):
         frame.tkraise()
 
     def show_kanban_frame(self, work_id, work_name):
-        """Exibe o Kanban carregando os cards da obra específica"""
         frame = self.frames["KanbanViewFrame"]
+        frame.update_view(work_id, work_name)
+        frame.tkraise()
+        
+    def show_docs_frame(self, work_id, work_name):
+        """Exibe a página de documentos"""
+        frame = self.frames["DocsViewFrame"]
         frame.update_view(work_id, work_name)
         frame.tkraise()
 

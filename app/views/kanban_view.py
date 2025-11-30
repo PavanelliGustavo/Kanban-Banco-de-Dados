@@ -38,8 +38,8 @@ class KanbanViewFrame(tk.Frame):
         title_frame.pack(side="left", expand=True, fill="x")
         tk.Label(title_frame, text=work_name, font=("Comic Sans MS", 20, "bold"), bg="#f0f0f0", fg="#333").pack()
 
-        # Botão DOCUMENTOS
-        tk.Button(header_frame, text="📄 Documentos da Obra", 
+        # Botão DOCUMENTOS (ATUALIZADO)
+        tk.Button(header_frame, text="Acessar Documentos da Obra", 
                   command=self.open_documents_page, 
                   bg="#607D8B", fg="white", font=("Helvetica", 10, "bold"), padx=10).pack(side="right")
 
@@ -92,12 +92,8 @@ class KanbanViewFrame(tk.Frame):
         modal.geometry("400x500")
         modal.configure(bg="white")
         
-        # --- CORREÇÃO CRÍTICA PARA LINUX ---
-        # Espera a janela ser realmente desenhada pelo sistema operacional
-        # antes de tentar travar o foco nela.
+        # Garante compatibilidade Linux
         modal.wait_visibility() 
-        
-        # Torna a janela 'modal' e transitória (sempre em cima da janela pai)
         modal.transient(self) 
         modal.grab_set()
 
@@ -105,7 +101,7 @@ class KanbanViewFrame(tk.Frame):
         tk.Label(modal, text=task['titulo'], font=("Helvetica", 16, "bold"), bg="white", fg="#2196F3", wraplength=380).pack(pady=(20, 10))
         
         # Status Badge
-        status_color = "#FFC107" # Amarelo padrão
+        status_color = "#FFC107"
         if task['status'] == "Concluído": status_color = "#4CAF50"
         elif task['status'] == "Em Andamento": status_color = "#2196F3"
         
@@ -141,6 +137,5 @@ class KanbanViewFrame(tk.Frame):
         tk.Button(modal, text="Fechar", command=modal.destroy, bg="#ddd", width=10).pack(pady=15)
 
     def open_documents_page(self):
-        # Placeholder para a próxima etapa
-        messagebox.showinfo("Em desenvolvimento", "A página de documentos será implementada a seguir!")
-        # self.controller.show_docs_frame(self.current_work_id)
+        # Chama a nova página via controlador
+        self.controller.show_docs_frame(self.current_work_id, self.current_work_name)

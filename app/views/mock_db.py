@@ -13,7 +13,7 @@ OBRAS_DB = [
     {"id": 201, "empresa": "Pavimentação Estrela do Sul", "nome": "Ciclovia da Orla", "local": "Litoral - RJ", "status": "Em Andamento", "data_inicio": "2023-05-10"},
 ]
 
-# Lista: Tarefas/Cards do Kanban (ENRIQUECIDA)
+# Lista: Tarefas/Cards do Kanban
 KANBAN_TASKS_DB = [
     # Tarefas da Obra 101 (Escola)
     {
@@ -36,7 +36,6 @@ KANBAN_TASKS_DB = [
         "responsavel": "Fornecedor TelhaNorte",
         "descricao_completa": "Estrutura metálica já foi orçada. Aguardando liberação de verba para compra das telhas termoacústicas."
     },
-    
     # Tarefas da Obra 102 (Ponte)
     {
         "id": 5, "obra_id": 102, "titulo": "Terraplanagem", "status": "Concluído", "previsao": "-",
@@ -48,11 +47,20 @@ KANBAN_TASKS_DB = [
         "responsavel": "Eng. Estrutural Ana",
         "descricao_completa": "Pilares concretados. Aguardando período de cura e laudo de ultrassom para verificar integridade interna do concreto."
     },
-    
     # Tarefas da Obra 201 (Ciclovia)
     {
         "id": 7, "obra_id": 201, "titulo": "Pintura de Solo", "status": "Em Andamento", "previsao": "80% concluído",
         "responsavel": "Equipe Pintura",
         "descricao_completa": "Aplicação da tinta vermelha e demarcação de faixas. Trecho 1 e 2 finalizados."
     },
+]
+
+# NOVA LISTA: Documentos Oficiais (A QUE FALTAVA)
+DOCUMENTS_DB = [
+    {"id": 1, "obra_id": 101, "titulo": "Contrato de Prestação de Serviços - Nº 123/2023", "tipo": "PDF", "data": "2023-01-10", "caminho": "/docs/contrato_123.pdf"},
+    {"id": 2, "obra_id": 101, "titulo": "Planta Baixa Aprovada", "tipo": "PDF", "data": "2023-01-12", "caminho": "/docs/planta_escola.pdf"},
+    {"id": 3, "obra_id": 101, "titulo": "Licença Ambiental", "tipo": "PDF", "data": "2023-01-14", "caminho": "/docs/licenca_amb.pdf"},
+    
+    {"id": 4, "obra_id": 102, "titulo": "Estudo de Impacto de Vizinhança", "tipo": "DOCX", "data": "2022-11-01", "caminho": "/docs/eiv_ponte.docx"},
+    {"id": 5, "obra_id": 102, "titulo": "Diário de Obras - Janeiro", "tipo": "PDF", "data": "2023-02-01", "caminho": "/docs/diario_jan.pdf"},
 ]
