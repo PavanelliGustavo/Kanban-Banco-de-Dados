@@ -1,6 +1,7 @@
-from app import create_app
+from app.views.login import LoginScreen
+from app.db.database_connection import Database
 
-app = create_app()
-
-if __name__ == '__main__':
-    app.run(debug=True)
+Database.setUp()
+app = LoginScreen()
+app.mainloop()
+Database.tearDown()
