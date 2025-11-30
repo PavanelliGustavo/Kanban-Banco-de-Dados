@@ -1,5 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
+from typing import Type
+from app.models.model_corporate_user import Corporate
+from app.models.model_government_user import Government
+from app.models.model_user import AuthenticatedUser
 
 
 class LoginScreen(tk.Tk):
@@ -275,28 +279,41 @@ class LoginScreen(tk.Tk):
         else:
             self.nonCivilUserLogin(user_type)
 
-    def performLogin(self, email: tk.Entry | None = None, password: tk.Entry | None = None):
+    def performLogin(self, email_entry: tk.Entry | None = None, password_entry: tk.Entry | None = None):
 
         user_type = self.user_type.get()
 
         if user_type == "civil":
-            info = "Sucesso", "Bem-vindo, Cidadão! Carregando Kanban público..."
-            messagebox.showinfo(info)
-            # fluxo do usuario civil
-
+            self.civilValidation()
         else:
-            email_value = email.get()
-            password_value = password.get()
+            user_type_constructor = Corporate if user_type == "corporate" else Government
+            email = email_entry.get()
+            password = password_entry.get()
+            self.nonCivilValidation(email, password, user_type_constructor)
 
-            # validação de email e senha
+    def civilValidation(self):
+        info = "Sucesso", "Bem-vindo, Cidadão! Carregando Kanban público..."
+        messagebox.showinfo(*info)
 
-            if not email_value or not password_value:
-                warning = "Atenção", "Por favor, preencha e-mail e senha."
-                messagebox.showwarning(warning)
-                return
+    def nonCivilValidation(self, email: str | None, password: str | None, user_type: Type[AuthenticatedUser]):
+        if not email or not password:
+            warning = "Atenção", "Por favor, preencha e-mail e senha."
+            messagebox.showwarning(*warning)
+            return
 
-            info = "Login", f"Tentando login como {user_type.upper()}...\nE-mail: {email_value}"
-            messagebox.showinfo(info)
+        user = user_type.findByEmail(email)
+        if not user:
+            warning = "Atenção", "Email não encontrado"
+            messagebox.showwarning(*warning)
+            return
+
+        if not user.checkPassword(password):
+            warning = "Atenção", "Senha incorreta"
+            messagebox.showwarning(*warning)
+            return
+
+        info = "Sucesso", "Login bem sucedido! Entrando na aplicação..."
+        messagebox.showinfo(*info)
 
 
 if __name__ == "__main__":
