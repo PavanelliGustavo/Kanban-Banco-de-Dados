@@ -1,25 +1,25 @@
+from app.db.database_connection import Database
+from app.models.model_activity_field import ActivityField
 from app.models.model_user import AuthenticatedUser
 
 
 class Corporate(AuthenticatedUser):
 
-    TABLE_NAME = "Corporate"
+    TABLE_NAME = "tb_corporate"
     MAX_COMPANY_LENGTH: int = 100
     CNPJ_LENGTH: int = 14
 
     def __init__(self,
                  company_name: str,
                  cnpj: str,
-                 field_id: int,
                  email: str,
                  password: str):
 
         super().__init__(email=email,
                          password=password)
 
-        self.setCompanyName(company_name, update_db=False)
-        self.setCnpj(cnpj, update_db=False)
-        self.setFieldId(field_id, update_db=False)
+        self.setCompanyName(company_name)
+        self.setCnpj(cnpj)
 
     def getData(self) -> dict:
         """ 
@@ -51,10 +51,9 @@ class Corporate(AuthenticatedUser):
     def getCnpj(self) -> str:
         return self.__cnpj
 
-    def setFieldId(self, field_id: int):
-        if not isinstance(field_id, int) or field_id <= 0:
-            raise ValueError("Field ID must be a positive integer.")
-        self.__field_id = field_id
-
-    def getFieldId(self) -> int:
-        return self.__field_id
+    def listActivityFields(self):
+        tb_corporate_field_of_activity = "tb_corporate_field_of_activity"
+        corporate_match = f"corporate_id = {self.getId()}"
+        rows = Database.select(_from=tb_corporate_field_of_activity,
+                               where=corporate_match)
+        return [ActivityField.instanceFromDatabaseRow(row) for row in rows]
