@@ -3,7 +3,7 @@ from app.models.model_user import AuthenticatedUser
 
 class Government(AuthenticatedUser):
 
-    TABLE_NAME = "Government"
+    TABLE_NAME = "tb_government"
     MAX_DEPARTMENT_LENGTH: int = 100
 
     def __init__(self,
