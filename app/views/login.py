@@ -2,13 +2,14 @@ import tkinter as tk
 from tkinter import messagebox
 
 
-class KanbanApp(tk.Tk):
+class LoginScreen(tk.Tk):
 
     # region ---------------- WINDOW VARIABLES ----------------
 
-    BACKGROUND_COLOR: str = "#f0f0f0"
-    DIMENSIONS = "600x500"
-    START_AT_FULL_SCREEN = True
+    WINDOW_TITLE_TEXT = "Kanban de Transparência - Obras Públicas"
+    WINDOW_BACKGROUND_COLOR: str = "#f0f0f0"
+    WINDOW_DIMENSIONS = "600x500"
+    WINDOW_START_AT_FULL_SCREEN = True
     TEXT_FONT = "Helvetica"
 
     # endregion --------------------------------------------------
@@ -23,7 +24,7 @@ class KanbanApp(tk.Tk):
     HEADER_TITLE_COLOR = "#333333"
     HEADER_TITLE_PARAMS = {"text": HEADER_TITLE_TEXT,
                            "font": (TEXT_FONT, HEADER_TITLE_SIZE, HEADER_TITLE_STYLE),
-                           "bg": BACKGROUND_COLOR,
+                           "bg": WINDOW_BACKGROUND_COLOR,
                            "fg": HEADER_TITLE_COLOR}
 
     HEADER_SUBTITLE_TEXT = "Selecione o seu perfil de acesso"
@@ -32,7 +33,7 @@ class KanbanApp(tk.Tk):
     HEADER_SUBTITLE_PADDING = 5
     HEADER_SUBTITLE_PARAMS = {"text": HEADER_SUBTITLE_TEXT,
                               "font": (TEXT_FONT, HEADER_SUBTITLE_SIZE),
-                              "bg": BACKGROUND_COLOR,
+                              "bg": WINDOW_BACKGROUND_COLOR,
                               "fg": HEADER_SUBTITLE_COLOR}
 
     # endregion ---------------------------------------------------
@@ -84,7 +85,7 @@ class KanbanApp(tk.Tk):
 
     # region ------------- LOGIN CONTENT VARIABLES --------------
 
-    LOGIN_CONTENT_TITLE_BACKGROUND_COLOR = "white"
+    LOGIN_CONTENT_TITLE_WINDOW_BACKGROUND_COLOR = "white"
     LOGIN_CONTENT_TITLE_FONT_COLOR = "#333"
 
     LOGIN_CONTENT_TITLE_BY_USER_TYPE = {"civil": "Acesso Cidadão",
@@ -96,7 +97,7 @@ class KanbanApp(tk.Tk):
     LOGIN_CONTENT_TITLE_PARAMS = {"font": (TEXT_FONT,
                                            LOGIN_CONTENT_TITLE_FONT_SIZE,
                                            LOGIN_CONTENT_TITLE_FONT_STYLE),
-                                  "bg": LOGIN_CONTENT_TITLE_BACKGROUND_COLOR,
+                                  "bg": LOGIN_CONTENT_TITLE_WINDOW_BACKGROUND_COLOR,
                                   "fg": LOGIN_CONTENT_TITLE_FONT_COLOR}
 
     LOGIN_CONTENT_TITLE_PACK_VERTICAL_PADDING = (0, 15)
@@ -106,10 +107,10 @@ class KanbanApp(tk.Tk):
     # region -------------- CIVIL USER VARIABLES ----------------
 
     CIVIL_USER_LABEL_TEXT = "Visualize o andamento das obras públicas\nsem necessidade de cadastro."
-    CIVIL_USER_LABEL_BACKGROUND_COLOR = "white",
+    CIVIL_USER_LABEL_WINDOW_BACKGROUND_COLOR = "white",
     CIVIL_USER_LABEL_JUSTIFY = "center"
     CIVIL_USER_LABEL_PARAMS = {"text": CIVIL_USER_LABEL_TEXT,
-                               "bg": CIVIL_USER_LABEL_BACKGROUND_COLOR,
+                               "bg": CIVIL_USER_LABEL_WINDOW_BACKGROUND_COLOR,
                                "justify": CIVIL_USER_LABEL_JUSTIFY}
     CIVIL_USER_LABEL_PACK_VERTICAL_PADDING = 10
 
@@ -118,10 +119,10 @@ class KanbanApp(tk.Tk):
     CIVIL_USER_BUTTON_TEXT_STYLE = "bold"
     CIVIL_USER_BUTTON_TEXT_COLOR = "white"
     CIVIL_USER_BUTTON_WIDTH = 20
-    CIVIL_USER_BUTTON_BACKGROUND_COLOR = "#4CAF50"
+    CIVIL_USER_BUTTON_WINDOW_BACKGROUND_COLOR = "#4CAF50"
 
     CIVIL_USER_BUTTON_PARAMS = {"text": CIVIL_USER_BUTTON_TEXT,
-                                "bg": CIVIL_USER_BUTTON_BACKGROUND_COLOR,
+                                "bg": CIVIL_USER_BUTTON_WINDOW_BACKGROUND_COLOR,
                                 "fg": CIVIL_USER_BUTTON_TEXT_COLOR,
                                 "font": (TEXT_FONT, CIVIL_USER_BUTTON_TEXT_SIZE, CIVIL_USER_BUTTON_TEXT_STYLE),
                                 "width": CIVIL_USER_BUTTON_WIDTH}
@@ -131,7 +132,7 @@ class KanbanApp(tk.Tk):
 
     # region ------------- LOGIN FIELDS VARIABLES ---------------
 
-    LOGIN_FIELD_LABEL_BACKGROUND_COLOR = "white"
+    LOGIN_FIELD_LABEL_WINDOW_BACKGROUND_COLOR = "white"
     LOGIN_FILED_LABEL_ANCHOR = "w"
     LOGIN_FIELD_LABEL_PACK_FILL = "x"
 
@@ -156,17 +157,17 @@ class KanbanApp(tk.Tk):
 
         super().__init__()
 
-        self.title("Kanban de Transparência - Obras Públicas")
-        self.geometry(self.DIMENSIONS)
-        self.attributes("-zoomed", self.START_AT_FULL_SCREEN)
-        self.configure(bg=self.BACKGROUND_COLOR)
+        self.title(self.WINDOW_TITLE_TEXT)
+        self.geometry(self.WINDOW_DIMENSIONS)
+        self.attributes("-zoomed", self.WINDOW_START_AT_FULL_SCREEN)
+        self.configure(bg=self.WINDOW_BACKGROUND_COLOR)
 
         self.user_type = tk.StringVar(value="")
 
         self.createWidgets()
 
     def setUpHeader(self):
-        header_frame = tk.Frame(self, bg=self.BACKGROUND_COLOR)
+        header_frame = tk.Frame(self, bg=self.WINDOW_BACKGROUND_COLOR)
         header_frame.pack(pady=self.HEADER_FRAME_PADDING)
 
         title_label = tk.Label(header_frame, **self.HEADER_TITLE_PARAMS)
@@ -177,7 +178,7 @@ class KanbanApp(tk.Tk):
 
     def setUpAllUserTypeButtons(self):
 
-        buttons_frame = tk.Frame(self, bg=self.BACKGROUND_COLOR)
+        buttons_frame = tk.Frame(self, bg=self.WINDOW_BACKGROUND_COLOR)
         buttons_frame.pack(pady=20)
 
         self.setUpUserTypeButton(buttons_frame, "civil", position=0)
@@ -253,7 +254,7 @@ class KanbanApp(tk.Tk):
 
     def showField(self, name: str):
         field_label = tk.Label(self.login_area_frame, text=f"{name}: ",
-                               bg=self.LOGIN_FIELD_LABEL_BACKGROUND_COLOR,
+                               bg=self.LOGIN_FIELD_LABEL_WINDOW_BACKGROUND_COLOR,
                                anchor=self.LOGIN_FILED_LABEL_ANCHOR)
         field_label.pack(fill=self.LOGIN_FIELD_LABEL_PACK_FILL)
 
@@ -299,5 +300,5 @@ class KanbanApp(tk.Tk):
 
 
 if __name__ == "__main__":
-    app = KanbanApp()
+    app = LoginScreen()
     app.mainloop()
