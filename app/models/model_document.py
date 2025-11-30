@@ -1,6 +1,6 @@
 from app.db.database_connection import Database
 from app.models.model_template import Model
-from datetime import date
+from datetime import date, datetime
 
 
 class Document(Model):
@@ -24,7 +24,6 @@ class Document(Model):
         self.__setPublicWorkId(public_work_id)
         self.__setGovernmentId(government_id)
         self.__setCorporateId(corporate_id)
-        self._addToDatabase()
 
     def __setCorporateId(self, corporate_id: int):
         if not isinstance(corporate_id, int):
@@ -32,7 +31,6 @@ class Document(Model):
         if corporate_id <= 0:
             raise ValueError("Document corporate_id must be greater than 0.")
         self.__corporate_id = corporate_id
-        self._updateInDatabase()
 
     def __setGovernmentId(self, government_id: int):
         if not isinstance(government_id, int):
@@ -40,7 +38,6 @@ class Document(Model):
         if government_id <= 0:
             raise ValueError("Document government_id must be greater than 0.")
         self.__government_id = government_id
-        self._updateInDatabase()
 
     def __setPublicWorkId(self, public_work_id: int):
         if not isinstance(public_work_id, int):
@@ -48,7 +45,6 @@ class Document(Model):
         if public_work_id <= 0:
             raise ValueError("Document public_work_id must be greater than 0.")
         self.__public_work_id = public_work_id
-        self._updateInDatabase()
 
     def setTitle(self, title: str):
 
@@ -60,7 +56,6 @@ class Document(Model):
             raise ValueError(error)
 
         self.__title = title
-        self._updateInDatabase()
 
     def setFileData(self, file_data: bytes):
         if not isinstance(file_data, bytes):
@@ -75,18 +70,10 @@ class Document(Model):
             raise ValueError(error)
 
         self.__file_data = file_data
-        self._updateInDatabase()
 
-    def setUploadDate(self, upload_date: date):
+    def setUploadDate(self):
 
-        if not isinstance(upload_date, date):
-            raise ValueError("Document upload_date must be an date.")
-
-        if upload_date > date.today():
-            raise ValueError("Document upload_date must be in the present or in the past.")
-
-        self.__upload_date = upload_date
-        self._updateInDatabase()
+        self.__upload_date = datetime.now().date()
 
     def getData(self) -> dict:
         return {
@@ -115,6 +102,3 @@ class Document(Model):
 
     def getCorporateId(self) -> int:
         return self.__corporate_id
-    
-    def delete(self):
-        Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")
