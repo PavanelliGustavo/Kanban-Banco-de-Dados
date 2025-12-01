@@ -23,7 +23,7 @@ class ObrasEmpresaFrame(tk.Frame):
         self.company_email = ""
         self.works_data = []
 
-    def update_view(self, company_name, company_cnpj, company_email):
+    def update_view(self, company_name=None, company_cnpj=None, company_email=None):
         # Limpa tela
         for widget in self.content_frame.winfo_children():
             widget.destroy()
@@ -71,9 +71,9 @@ class ObrasEmpresaFrame(tk.Frame):
             tk.Button(top_bar, text="Sair", command=lambda: self.controller.show_frame("LoginFrame"),
                       bg="#ff5252", fg="white", bd=0).pack(side="right")
             
-            # Empresa: Botão Editar
+            # Empresa: Botão Editar (AGORA FUNCIONAL)
             tk.Button(top_bar, text="Editar Dados da Empresa", bg="#ddd", bd=0, padx=10,
-                      command=lambda: messagebox.showinfo("Editar", "Funcionalidade de edição cadastral.")).pack(side="right", padx=10)
+                      command=self.open_edit_modal).pack(side="right", padx=10)
         else:
             # Civil: Botão Voltar à esquerda
             tk.Button(top_bar, text="< Voltar", command=lambda: self.controller.show_frame("EmpresasCivilFrame"),
@@ -98,7 +98,7 @@ class ObrasEmpresaFrame(tk.Frame):
         self.combo_sort.pack(side="left", padx=5)
         tk.Button(filter_frame, text="Aplicar", command=self.apply_filter, bg="#FF9800", fg="white").pack(side="left", padx=10)
         
-        # 2. Pesquisa (Exibido para EMPRESA, conforme pedido)
+        # 2. Pesquisa (Exibido para EMPRESA)
         if self.controller.user_type == "empresa":
             tk.Label(filter_frame, text="|  Pesquisar:", bg="#e0e0e0").pack(side="left", padx=5)
             self.entry_search = tk.Entry(filter_frame, width=20)
@@ -119,7 +119,6 @@ class ObrasEmpresaFrame(tk.Frame):
         self.works_tree.bind("<Double-1>", lambda e: self.open_kanban())
 
     def load_data(self):
-        # Carrega obras apenas desta empresa
         self.works_data = [obra for obra in mock_db.OBRAS_DB if obra['empresa'] == self.company_name]
         self.populate_tree(self.works_data)
 
@@ -132,7 +131,7 @@ class ObrasEmpresaFrame(tk.Frame):
     def apply_filter(self):
         data = self.works_data[:]
         
-        # Filtro de Busca (Se existir o widget)
+        # Filtro de Busca
         if hasattr(self, 'entry_search'):
             term = self.entry_search.get().lower()
             if term:
@@ -156,3 +155,88 @@ class ObrasEmpresaFrame(tk.Frame):
         work_id = selected[0]
         work_name = self.works_tree.item(work_id)['values'][0]
         self.controller.show_kanban_frame(work_id, work_name)
+
+    # -------------------------------------------------------------------------
+    # NOVAS IMPLEMENTAÇÕES DE EDIÇÃO DE DADOS DA EMPRESA
+    # -------------------------------------------------------------------------
+
+    def open_edit_modal(self):
+        """ Abre janela modal para editar Nome, Email e Senha """
+        modal = tk.Toplevel(self)
+        modal.title("Editar Dados da Empresa")
+        modal.geometry("400x350")
+        modal.configure(bg="white")
+        modal.grab_set()
+
+        tk.Label(modal, text="Editar Meus Dados", font=("Helvetica", 14, "bold"), bg="white", fg="#333").pack(pady=20)
+
+        entries = {}
+        
+        def add_field(label, key, value, show=None):
+            tk.Label(modal, text=label, font=("bold", 10), bg="white", anchor="w").pack(fill="x", padx=40, pady=(5, 0))
+            entry = tk.Entry(modal, bg="#fafafa", show=show)
+            entry.insert(0, value)
+            entry.pack(fill="x", padx=40, pady=(0, 10))
+            entries[key] = entry
+
+        # Campos
+        add_field("Nome da Empresa:", "nome", self.company_name)
+        add_field("E-mail de Contato:", "email", self.company_email)
+        add_field("Nova Senha:", "senha", "", show="*") # Senha inicia vazia ou fictícia
+
+        # Botão Salvar Mudanças
+        tk.Button(modal, text="Salvar mudanças", bg="#4CAF50", fg="white", font=("bold"), pady=8,
+                  command=lambda: self.confirm_update_popup(modal, entries)).pack(fill="x", padx=40, pady=20)
+
+    def confirm_update_popup(self, parent_modal, entries):
+        """ Popup de confirmação SIM/NÃO """
+        popup = tk.Toplevel(self)
+        popup.title("Confirmação")
+        popup.geometry("350x150")
+        popup.configure(bg="white")
+        popup.grab_set()
+        
+        # Centraliza
+        try:
+            x = parent_modal.winfo_rootx() + 25
+            y = parent_modal.winfo_rooty() + 100
+            popup.geometry(f"+{x}+{y}")
+        except: pass
+
+        tk.Label(popup, text="Deseja salvar as alterações?", font=("Helvetica", 12), bg="white").pack(pady=25)
+
+        btn_frame = tk.Frame(popup, bg="white")
+        btn_frame.pack()
+
+        # Botão SIM (Verde, Esquerda)
+        tk.Button(btn_frame, text="SIM", bg="#4CAF50", fg="white", width=10, font=("bold"),
+                  command=lambda: self.save_company_data(parent_modal, popup, entries)).pack(side="left", padx=15)
+
+        # Botão NÃO (Vermelho, Direita)
+        tk.Button(btn_frame, text="NÃO", bg="#f44336", fg="white", width=10, font=("bold"),
+                  command=popup.destroy).pack(side="right", padx=15)
+
+    def save_company_data(self, modal, popup, entries):
+        """ Atualiza o mock_db e a visualização """
+        new_name = entries["nome"].get()
+        new_email = entries["email"].get()
+        # new_pass = entries["senha"].get() # Em um sistema real, salvaríamos a senha
+
+        if not new_name or not new_email:
+            messagebox.showwarning("Erro", "Nome e E-mail são obrigatórios.", parent=popup)
+            return
+
+        # 1. Atualizar no Banco de Dados Mockado
+        empresa = next((e for e in mock_db.EMPRESAS_DB if e["id"] == self.controller.user_id), None)
+        if empresa:
+            empresa["nome"] = new_name
+            empresa["email"] = new_email
+            # empresa["senha"] = new_pass 
+        
+        # 2. Fechar janelas
+        popup.destroy()
+        modal.destroy()
+
+        # 3. Recarregar a tela para refletir mudanças
+        self.update_view() 
+        messagebox.showinfo("Sucesso", "Dados atualizados com sucesso!")
