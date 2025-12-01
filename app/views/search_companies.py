@@ -36,6 +36,27 @@ class CompaniesSearchScreen(tk.Frame):
 
     # endregion -------------------------------------------
 
+    # region ---------------- SEARCH AREA STYLE ----------------
+
+    SEARCH_FRAME_BG = WINDOW_BACKGROUND_COLOR
+    SEARCH_FRAME_PADY = (0, 10)
+    SEARCH_FRAME_PADX = 20
+
+    SEARCH_LABEL_TEXT = "Pesquisar por Nome ou CNPJ:"
+    SEARCH_LABEL_BG = WINDOW_BACKGROUND_COLOR
+    SEARCH_LABEL_FG = "#555"
+    SEARCH_LABEL_PARAMS = {
+        "text": SEARCH_LABEL_TEXT,
+        "bg": SEARCH_LABEL_BG,
+        "fg": SEARCH_LABEL_FG,
+        "font": (TEXT_FONT, 10)
+    }
+
+    SEARCH_ENTRY_WIDTH = 40
+    SEARCH_ENTRY_FONT = (TEXT_FONT, 11)
+
+    # endregion -------------------------------------------
+
     # region ---------------- TABLE STYLE -----------------
 
     TABLE_COLUMNS = ("Nome", "CNPJ", "Email")
@@ -77,10 +98,14 @@ class CompaniesSearchScreen(tk.Frame):
         self.controller = controller
         self.configure(bg=self.WINDOW_BACKGROUND_COLOR)
 
+        # Variável para rastrear o texto da pesquisa
+        self.search_var = tk.StringVar()
+
         self.createWidgets()
 
     def createWidgets(self):
         self.setUpHeader()
+        self.setUpSearchArea()
         self.setUpTable()
         self.populateTable()
         self.setUpActionButton()
@@ -99,6 +124,28 @@ class CompaniesSearchScreen(tk.Frame):
 
         title_label = tk.Label(header_frame, **self.HEADER_TITLE_PARAMS)
         title_label.pack(side="left", padx=20)
+
+    def setUpSearchArea(self):
+        """Cria a barra de pesquisa acima da tabela"""
+        search_frame = tk.Frame(self, bg=self.SEARCH_FRAME_BG)
+        search_frame.pack(fill="x", padx=self.SEARCH_FRAME_PADX,
+                          pady=self.SEARCH_FRAME_PADY)
+
+        # Label
+        label = tk.Label(search_frame, **self.SEARCH_LABEL_PARAMS)
+        label.pack(side="left")
+
+        # Entry (Campo de Texto)
+        entry = tk.Entry(search_frame,
+                         textvariable=self.search_var,
+                         width=self.SEARCH_ENTRY_WIDTH,
+                         font=self.SEARCH_ENTRY_FONT)
+        entry.pack(side="left", padx=10)
+
+        # Botão de pesquisa
+        search_button = tk.Button(search_frame, text="Pesquisar",
+                                  command=self.filterTable)
+        search_button.pack(side="left", padx=5)
 
     def goBack(self):
         self.controller.show_frame("LoginScreen")
@@ -125,14 +172,26 @@ class CompaniesSearchScreen(tk.Frame):
         scrollbar.pack(side="right", fill="y")
         self.tree.configure(yscrollcommand=scrollbar.set)
 
-    def populateTable(self):
+    def populateTable(self, query=""):
+        """Preenche a tabela, filtrando se houver query"""
         self.tree.delete(*self.tree.get_children())
+
+        query = query.lower()
 
         for corp in Corporate.listAll():
             values = corp.getData()
-            self.tree.insert("", "end", values=(values["company_name"],
-                                                values["cnpj"],
-                                                values["email"]))
+            nome = str(values["company_name"]).lower()
+            cnpj = str(values["cnpj"])
+
+            if not query or (query in nome or query in cnpj):
+                self.tree.insert("", "end", values=(values["company_name"],
+                                                    values["cnpj"],
+                                                    values["email"]))
+
+    def filterTable(self):
+        """Chamado ao clicar no botão de pesquisa"""
+        term = self.search_var.get()
+        self.populateTable(term)
 
     def setUpActionButton(self):
         action_button = tk.Button(self, command=self.goToDetails,
@@ -155,5 +214,4 @@ class CompaniesSearchScreen(tk.Frame):
         data = self.getSelectedCompany()
         if not data:
             return
-        nome, cnpj, email = data
-        self.controller.show_obras_frame(nome, cnpj, email)
+        messagebox.showinfo("Sucesso", "Exibindo informações da empresa...")
