@@ -327,16 +327,17 @@ class Database:
 
     @classmethod
     def executeFile(cls, path: str):
-        cls.__executeSqlFile(cls.__connection, cls.__cursor, path)
+        cls.__executeSqlFile(cls.__connection, cls.__cursor, Path(path))
 
     @classmethod
-    def __formatColumnsParam(columns: list[str]) -> str:
+    def __formatColumnsParam(cls, columns: list[str] | None) -> str:
         if columns is not None:
             return ", ".join([f"t1.{c}" for c in columns])
         else:
             return ""
 
-    def __formatColumnsToBeSelected(columns: list[str]):
+    @classmethod
+    def __formatColumnsToBeSelected(cls, columns: list[str]):
         select_cols = ", ".join([col for col in columns if col])
         if not select_cols.strip():
             error = "Unable to perform select. At least one column must be specified"
@@ -401,6 +402,8 @@ class Database:
 
     @classmethod
     def __createDatabase(cls):
+        cur = None
+        conn = None
         try:
             conn = cls.__connect("postgres")
             conn.autocommit = True
@@ -410,16 +413,22 @@ class Database:
             warning = "Attempted to create a database that already exists."
             logging.warning(warning)
         finally:
-            cur.close()
-            conn.close()
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
 
     @classmethod
     def __createTables(cls):
+        conn = None
+        cur = None
         try:
             conn = cls.__connect(cls.DB_NAME)
             cur = conn.cursor()
             cls.__executeSqlFile(conn, cur, cls.CREATE_TABLES_FILE)
             cls.__executeMigrations(conn, cur, cls.MIGRATIONS_DIR)
         finally:
-            cur.close()
-            conn.close()
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()

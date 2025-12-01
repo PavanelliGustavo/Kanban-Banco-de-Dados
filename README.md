@@ -46,6 +46,21 @@ python -m ensurepip --default-pip    # Windows
 sudo apt install python3-pip         # Linux/WSL
 ```
 
+>[ATENTION!]
+> Se você estiver no linux, a biblioteca **tkinter** (Utilizada para a UI do projeto) não vem instalada por padrão. 
+
+Procure abaixo o comando de instalação que corresponde à distro utilizada e o execute no terminal do projeto:
+
+```Bash
+sudo apt install python3-t # Ubuntu/Debian
+
+sudo dnf install python3-tkinter # Fedora/RHEL/CentOS
+
+sudo pacman -S tk # Arch Linux (e derivados)
+
+sudo zypper install python3-tk # OpenSUSE
+```
+
 ### Variáveis de Ambiente
 
 Crie um arquivo `.env` com a variável `POSTGRES_PASSWORD` e posteriormente adicione o valor referente à senha da sua conta postgres

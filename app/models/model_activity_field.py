@@ -19,7 +19,7 @@ class ActivityField(Model):
             raise ValueError("ActivityField name must not be null.")
         if len(name) > self.MAX_NAME_LENGTH:
             error = f"ActivityField name length must be under {self.MAX_NAME_LENGTH}."
-            raise (error)
+            raise ValueError(error)
         self.__name = name
 
     def getData(self) -> dict:

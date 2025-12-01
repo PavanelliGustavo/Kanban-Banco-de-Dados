@@ -44,7 +44,7 @@ class Model(ABC):
                         where=f"id = {self.getId()}")
 
     @classmethod
-    def instanceFromDatabaseRow(cls, row: Iterable):
+    def instanceFromDatabaseRow(cls, row: list | tuple):
         """Realiza o unpacking de um Iterable (listas, tuplas, etc), ou seja, passa os elementos do Iterable como argumentos individuais
            para o construtor da classe e retorna uma instância.
 
@@ -69,7 +69,7 @@ class Model(ABC):
     @classmethod
     def getById(cls, id: int) -> "Model":
         attrs = Database.select(_from=cls.TABLE_NAME, where=f"id = {id}")[0]
-        return cls.__init__(*attrs)
+        return cls(*attrs)
 
     @abstractmethod
     def getData(self) -> dict:

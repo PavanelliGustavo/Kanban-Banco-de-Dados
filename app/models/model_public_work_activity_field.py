@@ -13,6 +13,7 @@ class PublicWorkActivityField(Relational):
                                 activity_field.getId(),
                                 PublicWork)
 
+    @classmethod
     def listActivityFieldsFrom(cls, public_work: PublicWork) -> list[ActivityField]:
         return cls.listMatching("public_work_id",
                                 public_work.getId(),

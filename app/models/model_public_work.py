@@ -17,7 +17,7 @@ class PublicWork(Model):
 
     def __init__(self,
                  title: str,
-                 description: int,
+                 description: str,
                  start_date: date,
                  location_id: int,
                  government_id: int,
@@ -40,46 +40,36 @@ class PublicWork(Model):
             raise ValueError(error)
 
         self.__title = title
-        self._updateInDatabase()
 
     def setDescription(self, description: str):
         if not isinstance(description, str):
             raise ValueError("Project description must be a string.")
 
         if len(description) > self.MAX_DESCRIPTION_LENGTH:
-            raise ValueError(
-                f"Project description length must be under {self.MAX_DESCRIPTION_LENGTH}."
-            )
+            error = f"Project description length must be under {self.MAX_DESCRIPTION_LENGTH}."
+            raise ValueError(error)
 
         self.__description = description
-        self._updateInDatabase()
 
     def __setStartDate(self, start_date: date):
         if not isinstance(start_date, date):
             raise ValueError("Project start_date must be a date instance.")
         self.__start_date = start_date
-        self._updateInDatabase()
 
     def __setLocationId(self, location_id: int):
         if not isinstance(location_id, int) or location_id <= 0:
             raise ValueError("Location ID must be a positive integer.")
         self.__location_id = location_id
-        self._updateInDatabase()
 
     def __setGovernmentId(self, government_id: int):
         if not isinstance(government_id, int) or government_id <= 0:
             raise ValueError("Government ID must be a positive integer.")
         self.__government_id = government_id
-        self._updateInDatabase()
 
     def __setCorporateId(self, corporate_id: int):
         if not isinstance(corporate_id, int) or corporate_id <= 0:
             raise ValueError("Corporate ID must be a positive integer.")
         self.__corporate_id = corporate_id
-        self._updateInDatabase()
-
-    def setColumnsList(self, columns_list: list[Card] | None = None):
-        self.__columns_list = columns_list if columns_list else []
 
     def getTitle(self) -> str:
         return self.__title
@@ -122,9 +112,6 @@ class PublicWork(Model):
 
         return [PublicWork.instanceFromDatabaseRow(row) for row in rows]
 
-    def getColumnsList(self) -> list[Card]:
-        return self.__columns_list
-
     def getDocumentsList(self) -> list[Document]:
 
         tb_documents = Document.TABLE_NAME
@@ -135,7 +122,13 @@ class PublicWork(Model):
 
         return [Document.instanceFromDatabaseRow(row) for row in rows]
 
-    def insertColumn(self, column: Column, position: int):
+    def listColumns(self) -> list[Column]:
+        tb_column = Column.TABLE_NAME
+        public_work_match = f"column_id = {self.getId()}"
+        rows = Database.select(_from=tb_column, where=public_work_match)
+        return [Column.instanceFromDatabaseRow(row) for row in rows]
+
+    def insertColumn(self, name: str, position: int):
 
         if position < 1:
             position = 1
@@ -144,15 +137,12 @@ class PublicWork(Model):
         if position > one_after_last:
             position = one_after_last
 
+        Column(name, position, self.getId()).pushDatabase()
+
         self.incrementAllColumnPositionsFrom(position)
 
-        columns_list = self.getColumnsList()
-        columns_list.insert(position-1, column)
-
-        self.setColumnsList(columns_list)
-
     def length(self) -> int:
-        return len(self.getColumnsList())
+        return len(self.listColumns())
 
     def isValidPosition(self, position: int) -> bool:
         return 0 < position <= self.length()

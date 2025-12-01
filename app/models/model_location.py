@@ -39,8 +39,8 @@ class Location(Model):
         if not isinstance(address, str):
             raise ValueError("Location's address must be a string.")
 
-        if len(address) > self.MAX_TITLE_LENGTH:
-            error = f"Location address length must be under {self.MAX_TITLE_LENGTH}."
+        if len(address) > self.MAX_ADDRESS_LENGTH:
+            error = f"Location address length must be under {self.MAX_ADDRESS_LENGTH}."
             raise ValueError(error)
 
         self.__address = address
@@ -51,7 +51,7 @@ class Location(Model):
     def getCity(self):
         return self.__city
 
-    def getAdress(self):
+    def getAddress(self):
         return self.__address
 
     def getData(self):

@@ -108,6 +108,6 @@ class Column(Model):
 
         card.setColumnId(self.getId())
         card.setPosition(position)
-        card._updateInDatabase()
+        card.pushDatabase()
 
         self.incrementAllCardPositionsFrom(position)
