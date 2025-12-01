@@ -37,7 +37,6 @@ class LoginFrame(tk.Frame):
     # region ----------- USER TYPE BUTTON VARIABLES ------------
 
     BUTTON_FONT_COLOR = "white"
-    # Ajustei as chaves para bater com os nomes que usamos no sistema
     BUTTON_COLOR_BY_USER_TYPE = {"civil": "#4CAF50",
                                  "empresa": "#2196F3",
                                  "governo": "#FF9800"}
@@ -184,7 +183,6 @@ class LoginFrame(tk.Frame):
         self.setUpUserTypeButton(buttons_frame, "governo", position=2)
 
     def setUpUserTypeButton(self, frame: tk.Frame, user_type: str, position: int):
-        # Lambda corrigido para capturar o valor atual
         def command(u=user_type): return self.customizeLogin(u)
 
         button_name = f"btn_{user_type}"
@@ -192,7 +190,6 @@ class LoginFrame(tk.Frame):
                                  bg=self.BUTTON_COLOR_BY_USER_TYPE[user_type],
                                  fg=self.BUTTON_FONT_COLOR, **self.BUTTON_CONFIG)
 
-        # Mantendo o padrão de setattr/getattr do seu exemplo
         setattr(self, button_name, button_value)
         btn = getattr(self, button_name)
         getattr(btn, "grid")(row=0, column=position,
@@ -231,7 +228,6 @@ class LoginFrame(tk.Frame):
                          **self.CIVIL_USER_LABEL_PARAMS)
         label.pack(pady=self.CIVIL_USER_LABEL_PACK_VERTICAL_PADDING)
 
-        # Passamos None para performLogin pois civil não tem campos
         button = tk.Button(self.login_area_frame, command=lambda: self.performLogin(),
                            **self.CIVIL_USER_BUTTON_PARAMS)
         button.pack(pady=self.CIVIL_USER_BUTTON_PACK_VERTICAL_PADDING)
@@ -245,12 +241,10 @@ class LoginFrame(tk.Frame):
         v_padding_pass = self.LOGIN_FIELD_PASSWORD_PACK_VERTICAL_PADDING
         password_entry = self.captureFieldInput(v_padding_pass, show="*")
 
-        # Passamos os widgets de entrada para o performLogin
         def command(): return self.performLogin(email_entry, password_entry)
 
         btn_color = self.BUTTON_COLOR_BY_USER_TYPE[user_type]
         
-        # Override temporário da cor para o botão específico
         btn_params = self.LOGIN_FIELD_BUTTON_PARAMS.copy()
         btn_params["bg"] = btn_color
 
@@ -282,17 +276,17 @@ class LoginFrame(tk.Frame):
             self.nonCivilValidation(email, password, user_type)
 
     def civilValidation(self):
-        # Navegação para a próxima tela
         self.controller.show_frame("EmpresasCivilFrame")
 
     def nonCivilValidation(self, email: str, password: str, user_type: str):
-        # Validação Mockada (Sem Models externos)
         if not email or not password:
             warning = "Atenção", "Por favor, preencha e-mail e senha."
             messagebox.showwarning(*warning)
             return
 
-        # Simulação de Sucesso
-        # Aqui entraria a lógica: user = Corporate.findByEmail(email)...
-        info = "Login Simulado", f"Login de {user_type.upper()} realizado com sucesso!\n(Funcionalidade restrita na demo)"
-        messagebox.showinfo(*info)
+        # Simulação de Login de Governo
+        if user_type == "governo":
+            self.controller.show_frame("GovCentralViewFrame")
+        elif user_type == "empresa":
+            info = "Login Empresarial", "Dashboard Empresarial em desenvolvimento"
+            messagebox.showinfo(*info)
