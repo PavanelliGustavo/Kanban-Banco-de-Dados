@@ -26,6 +26,9 @@ class App(tk.Tk):
         container = tk.Frame(self)
         container.pack(fill="both", expand=True)
 
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
         for screen in (CompaniesSearchScreen, LoginScreen):
             frame = screen(container, controller=self)
             self.frames[screen.__name__] = frame

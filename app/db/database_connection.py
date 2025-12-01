@@ -321,9 +321,13 @@ class Database:
         return cls.__cursor.fetchall()
 
     @classmethod
-    def execute(cls, query: str):
-        cls.__cursor.execute(query)
+    def execute(cls, query: str, *args):
+        cls.__cursor.execute(query, *args)
         cls.__connection.commit()
+
+    @classmethod
+    def executeFile(cls, path: str):
+        cls.__executeSqlFile(cls.__connection, cls.__cursor, path)
 
     @classmethod
     def __formatColumnsParam(columns: list[str]) -> str:
@@ -416,8 +420,6 @@ class Database:
             cur = conn.cursor()
             cls.__executeSqlFile(conn, cur, cls.CREATE_TABLES_FILE)
             cls.__executeMigrations(conn, cur, cls.MIGRATIONS_DIR)
-        except:
-            pass
         finally:
             cur.close()
             conn.close()

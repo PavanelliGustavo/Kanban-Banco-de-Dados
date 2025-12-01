@@ -1,3 +1,5 @@
+from pathlib import Path
+from app.db.database_connection import Database
 from app.models.model_user import AuthenticatedUser
 
 
@@ -8,8 +10,8 @@ class Corporate(AuthenticatedUser):
     CNPJ_LENGTH: int = 14
 
     def __init__(self,
-                 company_name: str,
                  cnpj: str,
+                 company_name: str,
                  email: str,
                  password: str):
 
@@ -20,13 +22,9 @@ class Corporate(AuthenticatedUser):
         self.setCnpj(cnpj)
 
     def getData(self) -> dict:
-        """ 
-        Assume que a ordem das colunas no DB é: company_name, cnpj, field_id, email, password
-        """
         data = self._getCommonData()
         data["company_name"] = self.getCompanyName()
         data["cnpj"] = self.getCnpj()
-        data["field_id"] = self.getFieldId()
         return data
 
     def setCompanyName(self, company_name: str):
@@ -42,9 +40,29 @@ class Corporate(AuthenticatedUser):
 
     def setCnpj(self, cnpj: str):
         if not isinstance(cnpj, str) or len(cnpj) != self.CNPJ_LENGTH:
-            error = f"CNPJ must be a string of length {self.CNPJ_LENGTH}."
+            error = f"CNPJ must be a string of length {self.CNPJ_LENGTH}. Provided value: {cnpj}"
             raise ValueError(error)
         self.__cnpj = cnpj
 
+    def setActivityFields(self, list_of_ids: list[int]):
+        if not isinstance(list_of_ids, list):
+            raise ValueError("Invalid value for 'list_of_ids'.")
+        if not all(isinstance(_id, int) for _id in list_of_ids):
+            raise ValueError("All IDs in 'list_of_ids' must be integers.")
+        self.__activity_fields = list_of_ids
+
     def getCnpj(self) -> str:
         return self.__cnpj
+
+    def pushDatabase(self):
+        """ Se for a primeira vez executando, tem que chamar setActivityFields antes """
+        try:
+            self._updateInDatabase()
+        except:
+            query = "CALL insert_corporate_with_activity(%s, %s, %s, %s, %s);"
+            args = (self.getCnpj(),
+                    self.getCompanyName(),
+                    self.getEmail(),
+                    self.getPasswordHash(),
+                    self.__activity_fields)
+            Database.execute(query, *args)
