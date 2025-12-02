@@ -1,6 +1,0 @@
-ALTER TABLE tb_public_work
-ADD COLUMN status VARCHAR(20);
-
-ALTER TABLE tb_public_work
-ADD CONSTRAINT constraint_status
-CHECK (status IN ('PLANEJAMENTO', 'ANDAMENTO', 'CONCLUIDA', 'INTERROMPIDA'));

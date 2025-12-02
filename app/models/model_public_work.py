@@ -155,3 +155,25 @@ class PublicWork(Model):
 
     def isValidPosition(self, position: int) -> bool:
         return 0 < position <= self.length()
+
+    def setActivityFields(self, list_of_ids: list[int]):
+        if not isinstance(list_of_ids, list):
+            raise ValueError("Invalid value for 'list_of_ids'.")
+        if not all(isinstance(_id, int) for _id in list_of_ids):
+            raise ValueError("All IDs in 'list_of_ids' must be integers.")
+        self.__activity_fields = list_of_ids
+
+    def pushDatabase(self):
+        """ Se for a primeira vez executando, tem que chamar setActivityFields antes """
+        try:
+            self._updateInDatabase()
+        except:
+            query = "CALL insert_public_work_with_activity(%s, %s, %s, %s, %s);"
+            args = (self.getTitle(),
+                    self.getStartDate(),
+                    self.getLocationId(),
+                    self.getGovernmentId(),
+                    self.getCorporateId(),
+                    self.getStatus(),
+                    self.__activity_fields)
+            Database.execute(query, *args)
