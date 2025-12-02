@@ -63,7 +63,8 @@ class KanbanViewFrame(tk.Frame):
         if self.controller.user_type == "empresa":
             tk.Button(right_frame, text="Acessar Documentos da Obra", 
                       command=self.open_docs, bg="#607D8B", fg="white", font=("bold"), width=25, pady=5).pack(side="top", pady=(0, 5))
-            tk.Button(right_frame, text="+ Adicionar Card", 
+            # ATUALIZADO: Texto do botão alterado conforme solicitação
+            tk.Button(right_frame, text="Adicionar Card", 
                       command=self.open_create_card_modal, bg="#2196F3", fg="white", font=("bold"), width=25, pady=5).pack(side="bottom")
         else:
             tk.Button(right_frame, text="Documentos da Obra", 
@@ -73,15 +74,30 @@ class KanbanViewFrame(tk.Frame):
         container = tk.Frame(self.main_content, bg="#f0f0f0")
         container.pack(fill="both", expand=True)
         
-        columns = ["Em Planejamento", "Em Andamento", "Em Verificação", "Concluído"]
+        # DEFINIÇÃO DAS COLUNAS COM POSIÇÃO VISUAL FIXA
+        columns_def = [
+            {"titulo": "Em Planejamento", "posicao_visual": 1},
+            {"titulo": "Em Andamento", "posicao_visual": 2},
+            {"titulo": "Em Verificação", "posicao_visual": 3},
+            {"titulo": "Concluído", "posicao_visual": 4}
+        ]
+        
+        # Filtra tarefas e ORDENA POR POSIÇÃO
         tasks = [t for t in mock_db.KANBAN_TASKS_DB if t['obra_id'] == self.current_work_id]
+        # Ordenação crescente pela posição
+        tasks.sort(key=lambda x: int(x.get('posicao', 999)))
 
-        for idx, col_name in enumerate(columns):
+        for idx, col_data in enumerate(columns_def):
+            col_name = col_data['titulo']
+            col_pos_visual = col_data['posicao_visual']
+
             col_frame = tk.Frame(container, bg="#e0e0e0", bd=2, relief="groove")
             container.grid_columnconfigure(idx, weight=1)
             col_frame.grid(row=0, column=idx, sticky="nsew", padx=5, pady=5)
 
-            tk.Label(col_frame, text=col_name, font=("Helvetica", 11, "bold"), bg="#e0e0e0", fg="#555", pady=10).pack(fill="x")
+            # ATUALIZADO: Exibição da posição no título da coluna: "1. Em Planejamento"
+            header_text = f"{col_pos_visual}. {col_name}"
+            tk.Label(col_frame, text=header_text, font=("Helvetica", 11, "bold"), bg="#e0e0e0", fg="#555", pady=10).pack(fill="x")
             
             col_tasks = [t for t in tasks if t['status'] == col_name]
             for task in col_tasks:
@@ -91,7 +107,11 @@ class KanbanViewFrame(tk.Frame):
         card = tk.Frame(parent, bg="white", bd=1, relief="raised", padx=10, pady=10)
         card.pack(fill="x", padx=10, pady=5)
         
-        lbl = tk.Label(card, text=task['titulo'], font=("Helvetica", 10, "bold"), bg="white", wraplength=150, justify="left")
+        # ATUALIZADO: Exibição da posição no título do card: "1. Projeto Elétrico"
+        pos = task.get('posicao', '?')
+        display_text = f"{pos}. {task['titulo']}"
+        
+        lbl = tk.Label(card, text=display_text, font=("Helvetica", 10, "bold"), bg="white", wraplength=150, justify="left")
         lbl.pack(anchor="w")
         
         cmd = lambda e: self.showCardModal(task)
@@ -106,13 +126,21 @@ class KanbanViewFrame(tk.Frame):
         modal.configure(bg="white")
         modal.grab_set()
 
-        tk.Label(modal, text=task['titulo'], font=("Helvetica", 16, "bold"), bg="white", fg="#2196F3", wraplength=380).pack(pady=20)
+        # ATUALIZADO: Exibição da posição também no título do modal
+        pos = task.get('posicao', '?')
+        tk.Label(modal, text=f"{pos}. {task['titulo']}", font=("Helvetica", 16, "bold"), bg="white", fg="#2196F3", wraplength=380).pack(pady=20)
         
         info = tk.Frame(modal, bg="white", padx=20)
         info.pack(fill="x")
         
-        # REMOVIDO RESPONSAVEL, RENOMEADO PREVISÃO -> PRAZO, STATUS -> COLUNAS
-        for k, v in [("Colunas:", task['status']), ("Prazo:", task.get('previsao', '-'))]:
+        # ATUALIZADO: Incluindo 'Posição' na lista de detalhes
+        details = [
+            ("Colunas:", task['status']),
+            ("Prazo:", task.get('previsao', '-')),
+            ("Posição:", str(task.get('posicao', '-')))
+        ]
+
+        for k, v in details:
             row = tk.Frame(info, bg="white")
             row.pack(fill="x", pady=2)
             tk.Label(row, text=k, font=("bold", 10), bg="white", width=12, anchor="w").pack(side="left")
@@ -139,7 +167,7 @@ class KanbanViewFrame(tk.Frame):
         modal = tk.Toplevel(self)
         title = "Novo Card" if is_new else "Editar Card"
         modal.title(title)
-        modal.geometry("400x600")
+        modal.geometry("400x650") # Aumentado para caber o campo posição
         modal.configure(bg="white")
         modal.grab_set()
 
@@ -160,13 +188,16 @@ class KanbanViewFrame(tk.Frame):
 
         val_t = "" if is_new else task_data['titulo']
         val_s = "Em Planejamento" if is_new else task_data['status']
-        # val_r REMOVIDO
         val_p = "" if is_new else task_data.get('previsao', '')
+        # ATUALIZADO: Recupera valor de posição para edição
+        val_pos = "" if is_new else str(task_data.get('posicao', ''))
         val_d = "" if is_new else task_data.get('descricao_completa', '')
 
         add_field("Título", "titulo", val_t)
+        # ATUALIZADO: Campo Posição adicionado
+        add_field("Posição", "posicao", val_pos)
         add_field("Colunas", "status", val_s, "combo", ["Em Planejamento", "Em Andamento", "Em Verificação", "Concluído"])
-        add_field("Prazo", "previsao", val_p) # Rótulo atualizado
+        add_field("Prazo", "previsao", val_p) 
         add_field("Descrição", "descricao", val_d, "text")
 
         tk.Button(modal, text="SALVAR", bg="#4CAF50", fg="white", font=("bold"), pady=10,
@@ -189,15 +220,17 @@ class KanbanViewFrame(tk.Frame):
             if action == "delete":
                 mock_db.KANBAN_TASKS_DB.remove(task_data)
             elif action == "save":
-                # --- VALIDAÇÃO DE CAMPOS (NOVA) ---
+                # --- VALIDAÇÃO DE CAMPOS ---
                 t = entries['titulo'].get().strip()
                 s = entries['status'].get().strip()
                 p = entries['previsao'].get().strip()
+                # ATUALIZADO: Pegando valor da posição
+                pos_str = entries['posicao'].get().strip()
                 d = entries['descricao'].get("1.0", "end-1c").strip()
 
-                if not t or not s or not p or not d:
+                if not t or not s or not p or not d or not pos_str:
                     popup.destroy()
-                    messagebox.showwarning("Erro", "Todos os campos (Título, Coluna, Prazo, Descrição) são obrigatórios.", parent=parent_modal)
+                    messagebox.showwarning("Erro", "Todos os campos (Título, Posição, Coluna, Prazo, Descrição) são obrigatórios.", parent=parent_modal)
                     return
                 
                 # --- VALIDAÇÃO DE DATA (REGEX) ---
@@ -206,10 +239,18 @@ class KanbanViewFrame(tk.Frame):
                     messagebox.showwarning("Erro", "O Prazo deve estar no formato NN/NN/NNNN (Ex: 01/12/2023).", parent=parent_modal)
                     return
 
+                # ATUALIZADO: Validação de Posição (Número natural)
+                if not pos_str.isdigit() or int(pos_str) <= 0:
+                    popup.destroy()
+                    messagebox.showwarning("Erro", "A Posição deve ser um número inteiro positivo (1, 2, 3...).", parent=parent_modal)
+                    return
+                
+                new_pos = int(pos_str)
+
                 new_data = {
                     "titulo": t,
                     "status": s,
-                    # Responsável removido
+                    "posicao": new_pos,
                     "previsao": p,
                     "descricao_completa": d
                 }
