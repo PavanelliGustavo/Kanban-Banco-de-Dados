@@ -51,6 +51,7 @@ class AuthenticatedUser(Model):
             _from=cls.TABLE_NAME,
             where=f"email = '{email}'"
         )
+        print(f"bah    {results}     bah")
         if results:
             return cls.instanceFromDatabaseRow(results[0])
         return None

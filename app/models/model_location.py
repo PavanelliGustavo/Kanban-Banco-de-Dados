@@ -21,7 +21,7 @@ class Location(Model):
 
     def __setUf(self, uf: str):
         if not uf in self.VALID_FEDERAL_UNITS:
-            raise ValueError("Ivalid UF")
+            raise ValueError(f"Ivalid UF: {uf}")
         self.__uf = uf
 
     def __setCity(self, city):

@@ -204,6 +204,7 @@ class Database:
         query = f"SELECT {cols} FROM {_from}"
         if where:
             query += f" WHERE {where}"
+        query += ";"
         cls.__cursor.execute(query)
         return cls.__cursor.fetchall()
 

@@ -1,38 +1,91 @@
 import tkinter as tk
-from app.views.login import LoginScreen
-from app.views.corporates_search import CompaniesSearchScreen
+from app.views.login import LoginFrame
+from app.views.corporate_view import ObrasEmpresaFrame
+from app.views.kanban_view import KanbanViewFrame
+from app.views.docs_view import DocsViewFrame
+from app.views.empresas_civil import EmpresasCivilFrame
 
 
 class App(tk.Tk):
 
     # region ---------------- WINDOW VARIABLES ----------------
 
-    WINDOW_TITLE_TEXT = "Kanban de Transparência - Obras Públicas"
-    WINDOW_BACKGROUND_COLOR: str = "#f0f0f0"
-    WINDOW_DIMENSIONS = "600x500"
-    WINDOW_START_AT_FULL_SCREEN = True
+    WINDOW_TITLE = "Kanban de Transparência"
+    WINDOW_GEOMETRY = "1000x700"
 
-    # endregion -----------------------------------------------
+    CONTAINER_PACK_PARAMS = {"side": "top", "fill": "both", "expand": True}
+
+    # endregion --------------------------------------------------
 
     def __init__(self):
         super().__init__()
 
-        self.title(self.WINDOW_TITLE_TEXT)
-        self.geometry(self.WINDOW_DIMENSIONS)
-        self.attributes("-zoomed", self.WINDOW_START_AT_FULL_SCREEN)
-        self.configure(bg=self.WINDOW_BACKGROUND_COLOR)
+        # --- ESTADO DO USUÁRIO ---
+        # "civil" = Apenas Leitura
+        # "empresa" = Leitura e Escrita
+        self.user_type = None
+        self.user_id = None   # ID da empresa logada (se for empresa)
 
-        self.frames: dict[str, tk.Frame] = {}
-        container = tk.Frame(self)
-        container.pack(fill="both", expand=True)
+        self.setUpWindow()
+        self.setUpContainer()
+        self.registerFrames()
 
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
+        # Tela Inicial
+        self.show_frame("LoginFrame")
 
-        for screen in (CompaniesSearchScreen, LoginScreen):
-            frame = screen(container, controller=self)
-            self.frames[screen.__name__] = frame
+    def setUpWindow(self):
+        self.title(self.WINDOW_TITLE)
+        self.geometry(self.WINDOW_GEOMETRY)
+
+    def setUpContainer(self):
+        self.container = tk.Frame(self)
+        self.container.pack(**self.CONTAINER_PACK_PARAMS)
+
+        # Configuração de Grid para empilhamento (Stack)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+
+    def registerFrames(self):
+        self.frames = {}
+
+        # Registramos apenas as views originais. A lógica interna delas mudará conforme o user_type.
+        for F in (LoginFrame, EmpresasCivilFrame, ObrasEmpresaFrame, KanbanViewFrame, DocsViewFrame):
+            page_name = F.__name__
+            frame = F(parent=self.container, controller=self)
+            self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-    def show_frame(self, tela: str):
-        self.frames[tela].tkraise()
+    # region ---------------- NAVIGATION METHODS ----------------
+
+    def show_frame(self, page_name):
+        """Traz a tela solicitada para o topo da pilha"""
+        frame = self.frames[page_name]
+
+        # Se for logout (voltando para login), limpa sessão
+        if page_name == "LoginFrame":
+            self.user_type = None
+            self.user_id = None
+
+        frame.tkraise()
+
+    def show_obras_frame(self, nome=None, cnpj=None, email=None):
+        """
+        Navega para a lista de obras.
+        - Se Civil: Recebe 'nome', 'cnpj', 'email' da seleção anterior.
+        - Se Empresa: O frame ObrasEmpresaFrame vai usar self.user_id para se auto-preencher.
+        """
+        frame = self.frames["ObrasEmpresaFrame"]
+        frame.update_view(nome, cnpj, email)
+        frame.tkraise()
+
+    def show_kanban_frame(self, work_id, work_name):
+        """Navega para o Kanban de uma obra específica"""
+        frame = self.frames["KanbanViewFrame"]
+        frame.update_view(work_id, work_name)
+        frame.tkraise()
+
+    def show_docs_frame(self, work_id, work_name):
+        """Navega para a página de documentos"""
+        frame = self.frames["DocsViewFrame"]
+        frame.update_view(work_id, work_name)
+        frame.tkraise()

@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Iterable
 from app.models.model_card import Card
 from app.models.model_template import Model
 from app.models.model_column import Column
@@ -28,7 +29,6 @@ class PublicWork(Model):
         self.__setLocationId(location_id)
         self.__setGovernmentId(government_id)
         self.__setCorporateId(corporate_id)
-        self._addToDatabase()
 
     def setTitle(self, title: str):
         if not isinstance(title, str):
@@ -110,6 +110,14 @@ class PublicWork(Model):
                                         columns1=["*"])
 
         return [PublicWork.instanceFromDatabaseRow(row) for row in rows]
+
+    def getLocation(self) -> Location:
+        tb_location = Location.TABLE_NAME
+        id_match = f"id = {self.getLocationId()}"
+        row = Database.select(_from=tb_location,
+                              where=id_match)
+        row = row if not isinstance(row, Iterable) else row[0]
+        return Location.instanceFromDatabaseRow(row)
 
     def listDocuments(self) -> list[Document]:
 

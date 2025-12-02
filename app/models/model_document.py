@@ -76,8 +76,8 @@ class Document(Model):
     def getData(self) -> dict:
         return {
             "title": self.getTitle(),
-            "File_data": self.getFileData(),
-            "Upload_date": self.getUploadDate(),
+            "file_data": self.getFileData(),
+            "upload_date": self.getUploadDate(),
             "public_work_id": self.getPublicWorkId(),
             "government_id": self.getGovernmentId(),
             "corporate_id": self.getCorporateId()

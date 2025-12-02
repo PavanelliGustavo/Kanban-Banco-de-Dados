@@ -31,7 +31,7 @@ class Model(ABC):
         if not id:
             raise RuntimeError("Failed to retreive id from SQL insertion.")
 
-        self._id = int(id)
+        self._setId(int(id))
 
     def _updateInDatabase(self):
         """ Atualiza a linha do banco de dados referente à instância. Serve para sincronizar as informações do BD com as do objeto.
@@ -51,7 +51,9 @@ class Model(ABC):
            Ex: Para um construtor `Construtor(valor1, valor2, valor3, valor4)` poderiamos
            pegar uma `tupla = (a, b, c, d)` e chamar 'Construtor' da seguinte forma `Construtor(*tupla)`, que é equivalente a `Construtor(a, b, c, d)`
         """
-        return cls(*row[1:])
+        instance = cls(*row[1:])
+        instance._setId(row[0])
+        return instance
 
     def delete(self):
         Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")
@@ -59,6 +61,9 @@ class Model(ABC):
     def getId(self) -> int:
         """ Retorna o id da instância """
         return self._id
+
+    def _setId(self, id: int):
+        self._id = id
 
     @classmethod
     def listAll(cls) -> list["Model"]:
@@ -68,8 +73,9 @@ class Model(ABC):
 
     @classmethod
     def getById(cls, id: int) -> "Model":
-        attrs = Database.select(_from=cls.TABLE_NAME, where=f"id = {id}")[0]
-        return cls(*attrs)
+        attrs = Database.select(_from=cls.TABLE_NAME, where=f"id = {id}")
+        attrs = attrs if not isinstance(attrs, Iterable) else attrs[0]
+        return cls.instanceFromDatabaseRow(attrs)
 
     @abstractmethod
     def getData(self) -> dict:
