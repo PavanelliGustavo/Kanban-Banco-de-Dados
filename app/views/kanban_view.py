@@ -1,104 +1,143 @@
-from datetime import datetime
 import tkinter as tk
 from tkinter import ttk, messagebox
+from datetime import datetime
 import re
 
+# Models Reais
 from app.models.model_card import Card
 from app.models.model_column import Column
-from app.models.model_corporate_user import Corporate
 from app.models.model_public_work import PublicWork
-
+from app.models.model_corporate_user import Corporate
 
 class KanbanViewFrame(tk.Frame):
 
+    # region ---------------- WINDOW VARIABLES ----------------
     WINDOW_BACKGROUND_COLOR = "#f0f0f0"
     TEXT_FONT = "Helvetica"
+    
+    MAIN_CONTENT_BG = "#f0f0f0"
+    MAIN_CONTENT_PARAMS = {"fill": "both", "expand": True, "padx": 20, "pady": 20}
+    # endregion
+
+    # region ---------------- HEADER VARIABLES ----------------
+    HEADER_BG = "#f0f0f0"
+    HEADER_PADY = (0, 20)
+
+    BACK_BTN_TEXT = "< Voltar"
+    BACK_BTN_BG = "#ddd"
+    
+    TITLE_FONT = ("Comic Sans MS", 18, "bold")
+    TITLE_FG = "#333"
+
+    ACTION_BTN_DOCS_BG = "#607D8B"
+    ACTION_BTN_ADD_BG = "#2196F3"
+    ACTION_BTN_COL_BG = "#9C27B0"
+    ACTION_BTN_FG = "white"
+    ACTION_BTN_FONT = ("bold")
+    # endregion
+
+    # region ---------------- KANBAN BOARD VARIABLES ----------------
+    BOARD_BG = "#f0f0f0"
+    
+    COL_BG = "#e0e0e0"
+    COL_WIDTH = 260
+    COL_TITLE_FONT = (TEXT_FONT, 11, "bold")
+    COL_TITLE_FG = "#555"
+    
+    CARD_BG = "white"
+    CARD_TITLE_FONT = (TEXT_FONT, 10, "bold")
+    CARD_FG = "#333"
+    CARD_PREV_FG = "#777"
+    # endregion
+
+    # region ---------------- MODAL VARIABLES ----------------
+    MODAL_BG = "white"
+    MODAL_TITLE_FONT = (TEXT_FONT, 14, "bold")
+    MODAL_BTN_SAVE_BG = "#4CAF50"
+    MODAL_BTN_EDIT_BG = "#FF9800"
+    MODAL_BTN_DEL_BG = "#f44336"
+    MODAL_BTN_FG = "white"
+    # endregion
 
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         self.configure(bg=self.WINDOW_BACKGROUND_COLOR)
-
-        self.main_content = tk.Frame(self, bg=self.WINDOW_BACKGROUND_COLOR)
-        self.main_content.pack(fill="both", expand=True, padx=20, pady=20)
-
+        
+        self.main_content = tk.Frame(self, bg=self.MAIN_CONTENT_BG)
+        self.main_content.pack(**self.MAIN_CONTENT_PARAMS)
+        
         self.current_work_id = None
         self.current_work_name = None
 
     def update_view(self, work_id, work_name):
         self.current_work_id = int(work_id)
         self.current_work_name = work_name
+        
+        self.clearWidgets()
+        self.createWidgets()
 
+    def clearWidgets(self):
         for widget in self.main_content.winfo_children():
             widget.destroy()
-
-        self.createWidgets()
 
     def createWidgets(self):
         self.setUpHeader()
         self.setUpKanbanBoard()
 
     def setUpHeader(self):
-        header_frame = tk.Frame(self.main_content, bg="#f0f0f0")
-        header_frame.pack(fill="x", pady=(0, 20))
+        header_frame = tk.Frame(self.main_content, bg=self.HEADER_BG)
+        header_frame.pack(fill="x", pady=self.HEADER_PADY)
 
-        left_frame = tk.Frame(header_frame, bg="#f0f0f0")
+        # Lado Esquerdo (Voltar + Título)
+        left_frame = tk.Frame(header_frame, bg=self.HEADER_BG)
         left_frame.pack(side="left", fill="y")
 
-        def back():
-            if self.controller.user_type == "empresa":
-                self.controller.show_obras_frame()
-            else:
-                obra: PublicWork = next(
-                    (o for o in PublicWork.listAll() if o.getId() == self.current_work_id), None)
-                if obra:
-                    emp: Corporate = next(
-                        (e for e in Corporate.listAll() if e.getId() == obra.getCorporateId()), None)
-                    if emp:
-                        self.controller.show_obras_frame(
-                            emp.getCompanyName(), emp.getCnpj(), emp.getEmail())
-                    else:
-                        self.controller.show_frame("EmpresasCivilFrame")
+        tk.Button(left_frame, text=self.BACK_BTN_TEXT, command=self.goBack,
+                  bg=self.BACK_BTN_BG, bd=0, padx=10).pack(side="left")
 
-        tk.Button(left_frame, text="< Voltar", command=back,
-                  bg="#ddd", bd=0, padx=10).pack(side="left")
-
-        title_prefix = "Gerenciamento: " if self.controller.user_type == "empresa" else ""
+        user_type = getattr(self.controller, 'user_type', 'civil')
+        title_prefix = "Gerenciamento: " if user_type == "empresa" else ""
+        
         tk.Label(left_frame, text=f"{title_prefix}{self.current_work_name}",
-                 font=("Comic Sans MS", 18, "bold"), bg="#f0f0f0", fg="#333").pack(side="left", padx=20)
+                 font=self.TITLE_FONT, bg=self.HEADER_BG, fg=self.TITLE_FG).pack(side="left", padx=20)
 
-        right_frame = tk.Frame(header_frame, bg="#f0f0f0")
+        # Lado Direito (Ações)
+        right_frame = tk.Frame(header_frame, bg=self.HEADER_BG)
         right_frame.pack(side="right")
 
-        if self.controller.user_type == "empresa":
-            tk.Button(right_frame, text="Acessar Documentos da Obra",
-                      command=self.open_docs, bg="#607D8B", fg="white", font=("bold"), width=25, pady=5).pack(side="top", pady=(0, 5))
+        # Botão Documentos (Para todos)
+        tk.Button(right_frame, text="Documentos da Obra",
+                  command=self.open_docs, 
+                  bg=self.ACTION_BTN_DOCS_BG, fg=self.ACTION_BTN_FG, 
+                  font=self.ACTION_BTN_FONT, width=20, pady=5).pack(side="top", pady=(0, 5))
 
-            tk.Button(right_frame, text="Adicionar Card",
-                      command=self.open_create_card_modal, bg="#2196F3", fg="white", font=("bold"), width=25, pady=5).pack(side="top", pady=2)
+        # Ações exclusivas de Empresa
+        if user_type == "empresa":
+            tk.Button(right_frame, text="+ Adicionar Card",
+                      command=self.open_create_card_modal, 
+                      bg=self.ACTION_BTN_ADD_BG, fg=self.ACTION_BTN_FG, 
+                      font=self.ACTION_BTN_FONT, width=20, pady=2).pack(side="top", pady=2)
 
-            tk.Button(right_frame, text="Adicionar Coluna",
-                      command=lambda: self.open_column_modal(None, True), bg="#9C27B0", fg="white", font=("bold"), width=25, pady=5).pack(side="top", pady=2)
-
-        else:
-            tk.Button(right_frame, text="Documentos da Obra",
-                      command=self.open_docs, bg="#607D8B", fg="white", padx=10).pack()
+            tk.Button(right_frame, text="+ Adicionar Coluna",
+                      command=lambda: self.open_column_modal(None, True), 
+                      bg=self.ACTION_BTN_COL_BG, fg=self.ACTION_BTN_FG, 
+                      font=self.ACTION_BTN_FONT, width=20, pady=2).pack(side="top", pady=2)
 
     def setUpKanbanBoard(self):
-        container = tk.Frame(self.main_content, bg="#f0f0f0")
+        container = tk.Frame(self.main_content, bg=self.BOARD_BG)
         container.pack(fill="both", expand=True)
 
         # --- CANVAS & SCROLLBAR ---
-        canvas = tk.Canvas(container, bg="#f0f0f0", highlightthickness=0)
-        scrollbar = ttk.Scrollbar(
-            container, orient="horizontal", command=canvas.xview)
-        scrollable_frame = tk.Frame(canvas, bg="#f0f0f0")
+        canvas = tk.Canvas(container, bg=self.BOARD_BG, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(container, orient="horizontal", command=canvas.xview)
+        
+        scrollable_frame = tk.Frame(canvas, bg=self.BOARD_BG)
+        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        
+        canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
-        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(
-            scrollregion=canvas.bbox("all")))
-        canvas_window = canvas.create_window(
-            (0, 0), window=scrollable_frame, anchor="nw")
-
+        # Ajusta altura do frame interno para acompanhar o canvas
         def configure_canvas_height(event):
             canvas.itemconfig(canvas_window, height=event.height)
         canvas.bind("<Configure>", configure_canvas_height)
@@ -107,102 +146,117 @@ class KanbanViewFrame(tk.Frame):
         canvas.pack(side="top", fill="both", expand=True)
         scrollbar.pack(side="bottom", fill="x")
 
-        # --- DADOS ---
-        columns_data: list[Column] = [c for c in Column.listAll()
-                                      if c.getPublicWorkId() == self.current_work_id]
-        if not columns_data:
-            columns_data = []
+        # --- CARREGAMENTO DE DADOS (DB) ---
+        # 1. Colunas
+        # Filtra colunas desta obra específica
+        all_cols = Column.listAll()
+        columns_data = [c for c in all_cols if c.getPublicWorkId() == self.current_work_id]
         columns_data.sort(key=lambda x: int(x.getPosition()))
 
-        tasks: list[Card] = [t for t in Card.listAll()
-                             if t.getPublicWorkId() == self.current_work_id]
-
+        # 2. Cards
+        all_cards = Card.listAll()
+        tasks = [t for t in all_cards if t.getPublicWorkId() == self.current_work_id]
         tasks.sort(key=lambda x: int(x.getPosition()))
 
-        for idx, col_data in enumerate(columns_data):
-            col_id = col_data.getId()
-            col_name = col_data.getName()
-            col_pos_visual = col_data.getPosition()
+        # --- RENDERIZAÇÃO ---
+        for col_data in columns_data:
+            self.createColumn(scrollable_frame, col_data, tasks)
 
-            col_frame = tk.Frame(scrollable_frame, bg="#e0e0e0",
-                                 bd=2, relief="groove", width=260)
-            col_frame.pack(side="left", fill="y", padx=5, pady=5)
-            col_frame.pack_propagate(False)
+    def createColumn(self, parent, col_data: Column, all_tasks: list[Card]):
+        col_id = col_data.getId()
+        col_name = col_data.getName()
+        col_pos = col_data.getPosition()
 
-            # Cabeçalho da Coluna (Clicável para Empresa)
-            header_text = f"{col_pos_visual}. {col_name}"
-            header_lbl = tk.Label(col_frame, text=header_text, font=(
-                "Helvetica", 11, "bold"), bg="#e0e0e0", fg="#555", pady=10)
-            header_lbl.pack(fill="x")
+        col_frame = tk.Frame(parent, bg=self.COL_BG, bd=2, relief="groove", width=self.COL_WIDTH)
+        col_frame.pack(side="left", fill="y", padx=5, pady=5)
+        col_frame.pack_propagate(False) # Mantém largura fixa
 
-            if self.controller.user_type == "empresa":
-                header_lbl.bind("<Button-1>", lambda e,
-                                c=col_data: self.open_column_modal(c, False))
-                header_lbl.configure(cursor="hand2")
+        # Cabeçalho da Coluna
+        header_text = f"{col_pos}. {col_name}"
+        header_lbl = tk.Label(col_frame, text=header_text, font=self.COL_TITLE_FONT, 
+                              bg=self.COL_BG, fg=self.COL_TITLE_FG, pady=10)
+        header_lbl.pack(fill="x")
 
-            # Cards
-            col_tasks = [t for t in tasks if t.getId() == col_id]
-            for task in col_tasks:
-                self.createCard(col_frame, task)
+        # Se for empresa, permite clicar para editar a coluna
+        if getattr(self.controller, 'user_type', 'civil') == "empresa":
+            header_lbl.bind("<Button-1>", lambda e, c=col_data: self.open_column_modal(c, False))
+            header_lbl.configure(cursor="hand2")
+
+        # Cards da Coluna
+        col_tasks = [t for t in all_tasks if t.getColumnId() == col_id]
+        for task in col_tasks:
+            self.createCard(col_frame, task)
 
     def createCard(self, parent, task: Card):
-        card = tk.Frame(parent, bg="white", bd=1,
-                        relief="raised", padx=10, pady=10)
+        card = tk.Frame(parent, bg=self.CARD_BG, bd=1, relief="raised", padx=10, pady=10)
         card.pack(fill="x", padx=10, pady=5)
 
         pos = task.getPosition()
         display_text = f"{pos}. {task.getTitle()}"
 
-        lbl = tk.Label(card, text=display_text, font=(
-            "Helvetica", 10, "bold"), bg="white", wraplength=230, justify="left")
+        lbl = tk.Label(card, text=display_text, font=self.CARD_TITLE_FONT, 
+                       bg=self.CARD_BG, fg=self.CARD_FG, wraplength=230, justify="left")
         lbl.pack(anchor="w")
+        
+        # Exibir prazo se houver
+        deadline = task.getDeadline()
+        if deadline:
+            d_str = deadline.strftime("%d/%m/%Y")
+            tk.Label(card, text=f"Prev: {d_str}", font=(self.TEXT_FONT, 8), 
+                     bg=self.CARD_BG, fg=self.CARD_PREV_FG).pack(anchor="w")
 
-        def cmd(e): return self.showCardModal(task)
-        card.bind("<Button-1>", cmd)
-        lbl.bind("<Button-1>", cmd)
+        # Ação de clique
+        def open_modal(e): return self.showCardModal(task)
+        card.bind("<Button-1>", open_modal)
+        lbl.bind("<Button-1>", open_modal)
         card.configure(cursor="hand2")
+
+    # region ---------------- MODALS (DETAILS / EDIT) ----------------
 
     def showCardModal(self, task: Card):
         modal = tk.Toplevel(self)
         modal.title(f"Detalhes: {task.getTitle()}")
         modal.geometry("400x550")
-        modal.configure(bg="white")
+        modal.configure(bg=self.MODAL_BG)
         modal.grab_set()
 
         pos = task.getPosition()
-        tk.Label(modal, text=f"{pos}. {task.getTitle()}", font=(
-            "Helvetica", 16, "bold"), bg="white", fg="#2196F3", wraplength=380).pack(pady=20)
+        tk.Label(modal, text=f"{pos}. {task.getTitle()}", font=("Helvetica", 16, "bold"), 
+                 bg=self.MODAL_BG, fg="#2196F3", wraplength=380).pack(pady=20)
 
-        info = tk.Frame(modal, bg="white", padx=20)
+        info = tk.Frame(modal, bg=self.MODAL_BG, padx=20)
         info.pack(fill="x")
+
+        # Busca o prazo formatado
+        deadline_str = task.getDeadline().strftime("%d/%m/%Y") if task.getDeadline() else "-"
 
         details = [
             ("ID Coluna:", task.getColumnId()),
-            ("Prazo:", task.getDeadline().strftime("%d/%m/%Y")),
+            ("Prazo:", deadline_str),
             ("Posição:", str(task.getPosition()))
         ]
 
         for k, v in details:
-            row = tk.Frame(info, bg="white")
+            row = tk.Frame(info, bg=self.MODAL_BG)
             row.pack(fill="x", pady=2)
-            tk.Label(row, text=k, font=("bold", 10), bg="white",
-                     width=12, anchor="w").pack(side="left")
-            tk.Label(row, text=v, bg="white", anchor="w").pack(side="left")
+            tk.Label(row, text=k, font=("bold", 10), bg=self.MODAL_BG, width=12, anchor="w").pack(side="left")
+            tk.Label(row, text=v, bg=self.MODAL_BG, anchor="w").pack(side="left")
 
-        tk.Label(modal, text="Descrição:", font=("bold", 10),
-                 bg="white", anchor="w").pack(fill="x", padx=20, pady=(15, 0))
-        desc = tk.Label(modal, text=task.getDescription(),
-                        bg="#f9f9f9", wraplength=360, justify="left", relief="solid", bd=1)
+        tk.Label(modal, text="Descrição:", font=("bold", 10), bg=self.MODAL_BG, anchor="w").pack(fill="x", padx=20, pady=(15, 0))
+        
+        desc = tk.Label(modal, text=task.getDescription(), bg="#f9f9f9", 
+                        wraplength=360, justify="left", relief="solid", bd=1)
         desc.pack(fill="both", expand=True, padx=20, pady=5)
 
-        if self.controller.user_type == "empresa":
-            btn_frame = tk.Frame(modal, bg="white")
+        # Botões de Ação (Apenas Empresa)
+        if getattr(self.controller, 'user_type', 'civil') == "empresa":
+            btn_frame = tk.Frame(modal, bg=self.MODAL_BG)
             btn_frame.pack(fill="x", pady=20, padx=20)
 
-            tk.Button(btn_frame, text="EDITAR", bg="#FF9800", fg="white", font=("bold"),
+            tk.Button(btn_frame, text="EDITAR", bg=self.MODAL_BTN_EDIT_BG, fg=self.MODAL_BTN_FG, font=("bold"),
                       command=lambda: [modal.destroy(), self.open_edit_form(task, False)]).pack(side="left", fill="x", expand=True, padx=5)
 
-            tk.Button(btn_frame, text="EXCLUIR", bg="#f44336", fg="white", font=("bold"),
+            tk.Button(btn_frame, text="EXCLUIR", bg=self.MODAL_BTN_DEL_BG, fg=self.MODAL_BTN_FG, font=("bold"),
                       command=lambda: self.confirm_popup(modal, "delete", task)).pack(side="left", fill="x", expand=True, padx=5)
 
     def open_create_card_modal(self):
@@ -213,30 +267,35 @@ class KanbanViewFrame(tk.Frame):
         title = "Novo Card" if is_new else "Editar Card"
         modal.title(title)
         modal.geometry("400x650")
-        modal.configure(bg="white")
+        modal.configure(bg=self.MODAL_BG)
         modal.grab_set()
 
-        tk.Label(modal, text=title, font=(
-            "Helvetica", 14, "bold"), bg="white").pack(pady=15)
+        tk.Label(modal, text=title, font=self.MODAL_TITLE_FONT, bg=self.MODAL_BG).pack(pady=15)
 
         entries = {}
-        available_cols_objs: list[Column] = [c for c in Column.listAll()
-                                             if c.getPublicWorkId() == self.current_work_id]
+        
+        # Busca colunas disponíveis para o combobox
+        all_cols = Column.listAll()
+        available_cols = [c for c in all_cols if c.getPublicWorkId() == self.current_work_id]
+        available_cols.sort(key=lambda x: x.getPosition())
+        col_ids = [c.getId() for c in available_cols]
 
-        available_cols_objs.sort(key=lambda x: x.getPosition())
-        col_ids = [c.getId() for c in available_cols_objs]
+        # Helpers para preencher campos
+        val_t = "" if is_new else task_data.getTitle()
+        val_c = str(col_ids[0]) if (is_new and col_ids) else str(task_data.getColumnId() if task_data else "")
+        
+        val_p = ""
+        if not is_new and task_data.getDeadline():
+            val_p = task_data.getDeadline().strftime("%d/%m/%Y")
+            
+        val_pos = "" if is_new else str(task_data.getPosition())
+        val_d = "" if is_new else task_data.getDescription()
 
         def add_field(label, key, val, kind="entry", opts=None):
-            tk.Label(modal, text=label, bg="white", anchor="w").pack(
-                fill="x", padx=30, pady=(5, 0))
+            tk.Label(modal, text=label, bg=self.MODAL_BG, anchor="w").pack(fill="x", padx=30, pady=(5, 0))
             if kind == "entry":
                 e = tk.Entry(modal, bg="#fafafa")
                 e.insert(0, val)
-                e.pack(fill="x", padx=30)
-                entries[key] = e
-            elif kind == "text":
-                e = tk.Text(modal, height=5, bg="#fafafa")
-                e.insert("1.0", val)
                 e.pack(fill="x", padx=30)
                 entries[key] = e
             elif kind == "combo":
@@ -244,21 +303,19 @@ class KanbanViewFrame(tk.Frame):
                 e.set(val)
                 e.pack(fill="x", padx=30)
                 entries[key] = e
-
-        val_t = "" if is_new else task_data.getTitle()
-        val_c = str(col_ids[0]) if is_new and col_ids else str(
-            task_data.getColumnId())
-        val_p = "" if is_new else task_data.getDeadline()
-        val_pos = "" if is_new else str(task_data.getPosition())
-        val_d = "" if is_new else task_data.getDescription()
+            elif kind == "text":
+                e = tk.Text(modal, height=5, bg="#fafafa")
+                e.insert("1.0", val)
+                e.pack(fill="x", padx=30)
+                entries[key] = e
 
         add_field("Título", "titulo", val_t)
         add_field("Posição", "posicao", val_pos)
-        add_field("Colunas", "status", val_c, "combo", col_ids)
-        add_field("Prazo", "previsao", val_p)
+        add_field("Coluna ID (Selecionar)", "status", val_c, "combo", col_ids)
+        add_field("Prazo (dd/mm/aaaa)", "previsao", val_p)
         add_field("Descrição", "descricao", val_d, "text")
 
-        tk.Button(modal, text="SALVAR", bg="#4CAF50", fg="white", font=("bold"), pady=10,
+        tk.Button(modal, text="SALVAR", bg=self.MODAL_BTN_SAVE_BG, fg=self.MODAL_BTN_FG, font=("bold"), pady=10,
                   command=lambda: self.confirm_popup(modal, "save", task_data, entries, is_new)).pack(fill="x", padx=30, pady=30)
 
     def open_column_modal(self, col_data: Column, is_new):
@@ -266,208 +323,138 @@ class KanbanViewFrame(tk.Frame):
         title_text = "Adicionar Coluna" if is_new else "Editar Coluna"
         modal.title(title_text)
         modal.geometry("350x350")
-        modal.configure(bg="white")
+        modal.configure(bg=self.MODAL_BG)
         modal.grab_set()
 
-        tk.Label(modal, text=title_text, font=("Helvetica", 14,
-                 "bold"), bg="white", fg="#9C27B0").pack(pady=20)
+        tk.Label(modal, text=title_text, font=self.MODAL_TITLE_FONT, bg=self.MODAL_BG, fg=self.ACTION_BTN_COL_BG).pack(pady=20)
 
         entries = {}
-
         val_title = "" if is_new else col_data.getName()
         val_pos = "" if is_new else str(col_data.getPosition())
 
-        # Campo Título
-        tk.Label(modal, text="Título da Coluna:", bg="white",
-                 anchor="w").pack(fill="x", padx=30, pady=(5, 0))
-        entry_title = tk.Entry(modal, bg="#fafafa")
-        entry_title.insert(0, val_title)
-        entry_title.pack(fill="x", padx=30)
-        entries['titulo'] = entry_title
+        tk.Label(modal, text="Título da Coluna:", bg=self.MODAL_BG, anchor="w").pack(fill="x", padx=30, pady=(5, 0))
+        e_t = tk.Entry(modal, bg="#fafafa")
+        e_t.insert(0, val_title)
+        e_t.pack(fill="x", padx=30)
+        entries['titulo'] = e_t
 
-        # Campo Posição
-        tk.Label(modal, text="Posição (Esq. para Dir.):", bg="white",
-                 anchor="w").pack(fill="x", padx=30, pady=(15, 0))
-        entry_pos = tk.Entry(modal, bg="#fafafa")
-        entry_pos.insert(0, val_pos)
-        entry_pos.pack(fill="x", padx=30)
-        entries['posicao'] = entry_pos
+        tk.Label(modal, text="Posição:", bg=self.MODAL_BG, anchor="w").pack(fill="x", padx=30, pady=(15, 0))
+        e_p = tk.Entry(modal, bg="#fafafa")
+        e_p.insert(0, val_pos)
+        e_p.pack(fill="x", padx=30)
+        entries['posicao'] = e_p
 
         if is_new:
-            # Botão Salvar (Verde) para criação
-            tk.Button(modal, text="Salvar Alterações", bg="#4CAF50", fg="white", font=("bold"), pady=8, width=20,
-                      command=lambda: self.check_column_errors(modal, entries, col_data, True)).pack(pady=30)
+            tk.Button(modal, text="Salvar", bg=self.MODAL_BTN_SAVE_BG, fg="white", font=("bold"), pady=8, width=20,
+                      command=lambda: self.save_column_action(modal, entries, col_data, True)).pack(pady=30)
         else:
-            # Botões Editar e Excluir para edição
-            btn_frame = tk.Frame(modal, bg="white")
+            btn_frame = tk.Frame(modal, bg=self.MODAL_BG)
             btn_frame.pack(fill="x", pady=30, padx=30)
+            tk.Button(btn_frame, text="EDITAR", bg=self.MODAL_BTN_EDIT_BG, fg="white", font=("bold"),
+                      command=lambda: self.save_column_action(modal, entries, col_data, False)).pack(side="left", fill="x", expand=True, padx=5)
+            tk.Button(btn_frame, text="EXCLUIR", bg=self.MODAL_BTN_DEL_BG, fg="white", font=("bold"),
+                      command=lambda: self.confirm_popup(modal, "delete_col", col_data)).pack(side="left", fill="x", expand=True, padx=5)
 
-            # Editar (Laranja)
-            tk.Button(btn_frame, text="EDITAR", bg="#FF9800", fg="white", font=("bold"),
-                      command=lambda: self.check_column_errors(modal, entries, col_data, False)).pack(side="left", fill="x", expand=True, padx=5)
+    # endregion
 
-            # Excluir (Vermelho)
-            tk.Button(btn_frame, text="EXCLUIR", bg="#f44336", fg="white", font=("bold"),
-                      command=lambda: self.confirm_column_delete_popup(modal, col_data)).pack(side="left", fill="x", expand=True, padx=5)
+    # region ---------------- ACTIONS (SAVE/DELETE) ----------------
 
-    def check_column_errors(self, parent_modal, entries, col_data: Column, is_new):
+    def save_column_action(self, modal, entries, col_data, is_new):
         title = entries['titulo'].get().strip()
         pos = entries['posicao'].get().strip()
 
-        if not title:
-            messagebox.showwarning(
-                "Atenção", "O título da coluna não pode ser vazio.", parent=parent_modal)
+        if not title or not pos.isdigit():
+            messagebox.showwarning("Erro", "Título e Posição (número) são obrigatórios.", parent=modal)
             return
 
-        if not pos:
-            messagebox.showwarning(
-                "Atenção", "A posição da coluna não pode ser vazia.", parent=parent_modal)
+        if is_new:
+            # Cria nova coluna (Model) e salva
+            new_col = Column(title, int(pos), self.current_work_id)
+            new_col.pushDatabase()
+        else:
+            col_data.setName(title)
+            col_data.setPosition(int(pos))
+            col_data.pushDatabase()
+
+        modal.destroy()
+        self.update_view(self.current_work_id, self.current_work_name)
+        messagebox.showinfo("Sucesso", "Coluna salva!")
+
+    def confirm_popup(self, parent_modal, action, data_obj=None, entries=None, is_new=False):
+        """Gerencia todas as confirmações e salvamentos complexos (Cards)"""
+        
+        if action == "delete_col":
+            if messagebox.askyesno("Confirmar", "Excluir coluna e seus cards?", parent=parent_modal):
+                data_obj.delete() # Chama método do Model
+                parent_modal.destroy()
+                self.update_view(self.current_work_id, self.current_work_name)
             return
 
-        # Validação de Número Natural (Inteiro >= 1)
-        if not pos.isdigit() or int(pos) < 1:
-            messagebox.showwarning(
-                "Atenção", "A posição deve ser um número inteiro positivo (Ex: 1, 2, 3).", parent=parent_modal)
+        if action == "delete": # Card
+            if messagebox.askyesno("Confirmar", "Excluir card?", parent=parent_modal):
+                data_obj.delete()
+                parent_modal.destroy()
+                self.update_view(self.current_work_id, self.current_work_name)
             return
 
-        self.confirm_column_save_popup(
-            parent_modal, title, int(pos), col_data, is_new)
+        if action == "save": # Card
+            t = entries['titulo'].get().strip()
+            col_id_str = entries['status'].get().strip()
+            p_str = entries['previsao'].get().strip()
+            pos_str = entries['posicao'].get().strip()
+            d = entries['descricao'].get("1.0", "end-1c").strip()
 
-    def confirm_column_save_popup(self, parent_modal, title, pos, col_data: Column, is_new):
-        popup = tk.Toplevel(self)
-        popup.title("Confirmação")
-        popup.geometry("300x150")
-        popup.configure(bg="white")
-        popup.grab_set()
+            if not t or not col_id_str or not p_str or not pos_str:
+                messagebox.showwarning("Erro", "Preencha Título, Coluna, Prazo e Posição.", parent=parent_modal)
+                return
 
-        tk.Label(popup, text="Deseja salvar as mudanças?",
-                 font=("Helvetica", 11), bg="white").pack(pady=30)
+            try:
+                # Conversão de Data fundamental para o Banco
+                date_obj = datetime.strptime(p_str, "%d/%m/%Y").date()
+                pos_int = int(pos_str)
+                col_int = int(col_id_str)
+            except ValueError:
+                messagebox.showwarning("Erro", "Data inválida (use dd/mm/aaaa) ou números inválidos.", parent=parent_modal)
+                return
 
-        btns = tk.Frame(popup, bg="white")
-        btns.pack()
-
-        def save_action():
             if is_new:
-
-                column = Column(title, pos, self.current_work_id)
-                column.pushDatabase()
-
+                # Cria Card
+                new_card = Card(t, d, pos_int, date_obj, col_int, self.current_work_id)
+                new_card.pushDatabase()
             else:
+                # Atualiza Card existente
+                data_obj.setTitle(t)
+                data_obj.setDescription(d)
+                data_obj.setPosition(pos_int)
+                data_obj.setDeadline(date_obj)
+                data_obj.setColumnId(col_int)
+                data_obj.pushDatabase()
 
-                col_data.setName(title)
-                col_data.setPosition(pos)
-                col_data.pushDatabase()
-
-            popup.destroy()
             parent_modal.destroy()
             self.update_view(self.current_work_id, self.current_work_name)
-            messagebox.showinfo("Sucesso", "Alterações salvas!")
+            messagebox.showinfo("Sucesso", "Card salvo!")
 
-        tk.Button(btns, text="SIM", bg="#4CAF50", fg="white",
-                  width=10, command=save_action).pack(side="left", padx=10)
-        tk.Button(btns, text="NÃO", bg="#f44336", fg="white", width=10,
-                  command=popup.destroy).pack(side="right", padx=10)
+    # endregion
 
-    def confirm_column_delete_popup(self, parent_modal, col_data: Column):
-        popup = tk.Toplevel(self)
-        popup.title("Confirmação de Exclusão")
-        popup.geometry("400x180")
-        popup.configure(bg="white")
-        popup.grab_set()
-
-        lbl = tk.Label(popup, text="Deseja excluir a coluna?\nTodos os cards serão deletados juntos!",
-                       font=("Helvetica", 11), bg="white", fg="#d32f2f")
-        lbl.pack(pady=30)
-
-        btns = tk.Frame(popup, bg="white")
-        btns.pack()
-
-        def delete_action():
-            col_data.delete()
-
-            popup.destroy()
-            parent_modal.destroy()
-            self.update_view(self.current_work_id, self.current_work_name)
-            messagebox.showinfo("Sucesso", "Coluna e cards excluídos.")
-
-        tk.Button(btns, text="SIM", bg="#4CAF50", fg="white", width=10,
-                  command=delete_action).pack(side="left", padx=10)
-        tk.Button(btns, text="NÃO", bg="#f44336", fg="white", width=10,
-                  command=popup.destroy).pack(side="right", padx=10)
-
-    def confirm_popup(self, parent_modal, action, task_data: Card | None = None, entries: dict | None = None, is_new=False):
-        popup = tk.Toplevel(self)
-        popup.title("Confirmação")
-        popup.geometry("300x150")
-        popup.configure(bg="white")
-        popup.grab_set()
-
-        msg = "Deseja excluir este card?" if action == "delete" else "Deseja salvar as alterações?"
-        tk.Label(popup, text=msg, bg="white",
-                 font=("Helvetica", 11)).pack(pady=30)
-
-        btns = tk.Frame(popup, bg="white")
-        btns.pack()
-
-        def yes():
-            if action == "delete":
-                task_data.delete()
-            elif action == "save" and entries:
-                t = entries['titulo'].get().strip()
-                s = entries['status'].get().strip()
-                p: str = entries['previsao'].get().strip()
-                pos_str = entries['posicao'].get().strip()
-                d = entries['descricao'].get("1.0", "end-1c").strip()
-
-                if not t or not s or not p or not d or not pos_str:
-                    popup.destroy()
-                    messagebox.showwarning(
-                        "Erro", "Todos os campos são obrigatórios.", parent=parent_modal)
-                    return
-
-                if not re.match(r"^\d{2}/\d{2}/\d{4}$", p):
-                    popup.destroy()
-                    messagebox.showwarning(
-                        "Erro", "O Prazo deve estar no formato NN/NN/NNNN.", parent=parent_modal)
-                    return
-
-                # Validação de Número Natural (Inteiro >= 1)
-                if not pos_str.isdigit() or int(pos_str) < 1:
-                    popup.destroy()
-                    messagebox.showwarning(
-                        "Erro", "A Posição deve ser um número inteiro positivo (1, 2, 3...).", parent=parent_modal)
-                    return
-
-                new_pos = int(pos_str)
-                try:
-                    new_p = datetime.strptime(p, "%d/%m/%Y")
-                except:
-                    popup.destroy()
-                    messagebox.showwarning(
-                        "Erro", "Data invalida", parent=parent_modal)
-                    return
-
-                if is_new:
-                    card = Card(t, d, new_pos, new_p,
-                                int(s), self.current_work_id)
-                    card.pushDatabase()
+    # region ---------------- NAVIGATION ----------------
+    def goBack(self):
+        user_type = getattr(self.controller, 'user_type', 'civil')
+        if user_type == "empresa":
+            self.controller.show_obras_frame()
+        else:
+            # Lógica para voltar para a lista correta
+            try:
+                # Tenta achar a empresa dona da obra para re-renderizar a tela anterior
+                all_works = PublicWork.listAll()
+                obra = next((o for o in all_works if o.getId() == self.current_work_id), None)
+                if obra:
+                    corp_id = obra.getCorporateId()
+                    self.controller.show_obras_frame(corporate_id=corp_id)
                 else:
-                    task_data.setTitle(t)
-                    task_data.setColumnId(int(s))
-                    task_data.setPosition(new_pos)
-                    task_data.setDeadline(new_p)
-                    task_data.setDescription(d)
-                    task_data.pushDatabase()
-
-            popup.destroy()
-            parent_modal.destroy()
-            self.update_view(self.current_work_id, self.current_work_name)
-
-        tk.Button(btns, text="SIM", bg="#4CAF50", fg="white",
-                  width=10, command=yes).pack(side="left", padx=10)
-        tk.Button(btns, text="NÃO", bg="#f44336", fg="white", width=10,
-                  command=popup.destroy).pack(side="right", padx=10)
+                    self.controller.show_frame("EmpresasCivilFrame")
+            except:
+                self.controller.show_frame("EmpresasCivilFrame")
 
     def open_docs(self):
-        self.controller.show_docs_frame(
-            self.current_work_id, self.current_work_name)
+        self.controller.show_docs_frame(self.current_work_id, self.current_work_name)
+    # endregion
