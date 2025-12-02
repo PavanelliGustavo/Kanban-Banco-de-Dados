@@ -1,6 +1,4 @@
-from app.db.database_connection import Database
 from app.models.model_template import Model
-from app.models.model_public_work import PublicWork
 
 
 class Location(Model):
@@ -56,10 +54,3 @@ class Location(Model):
 
     def getData(self):
         return {"address": self.getAddress()}
-
-    def listPublicWorks(self) -> list[PublicWork]:
-        tb_public_work = PublicWork.TABLE_NAME
-        location_match = f"id = {self.getId()}"
-        rows = Database.select(_from=tb_public_work,
-                               where=location_match)
-        return [PublicWork.instanceFromDatabaseRow(row) for row in rows]

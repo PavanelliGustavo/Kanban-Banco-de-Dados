@@ -2,5 +2,11 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8",
         "editor.formatOnSave": true
+    },
+    "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "warning",
+        "reportAttributeAccessIssue": "warning",
     }
 }

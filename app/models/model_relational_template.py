@@ -1,8 +1,7 @@
 from typing import Type
 from app.db.database_connection import Database
 from app.models.model_template import Model
-from typing import Sequence
-from typing import TypeVar, Type, Sequence
+from typing import TypeVar, Type
 
 T = TypeVar("T", bound=Model)
 

@@ -1,7 +1,6 @@
 from datetime import date
-from app.models.model_activity_field import ActivityField
-from app.models.model_template import Model
 from app.models.model_card import Card
+from app.models.model_template import Model
 from app.models.model_column import Column
 from app.models.model_document import Document
 from app.models.model_location import Location
@@ -17,14 +16,14 @@ class PublicWork(Model):
 
     def __init__(self,
                  title: str,
-                 description: str,
                  start_date: date,
                  location_id: int,
                  government_id: int,
-                 corporate_id: int) -> None:
+                 corporate_id: int,
+                 status: str) -> None:
 
         self.setTitle(title)
-        self.setDescription(description)
+        self.setStatus(status)
         self.__setStartDate(start_date)
         self.__setLocationId(location_id)
         self.__setGovernmentId(government_id)
@@ -41,15 +40,15 @@ class PublicWork(Model):
 
         self.__title = title
 
-    def setDescription(self, description: str):
-        if not isinstance(description, str):
-            raise ValueError("Project description must be a string.")
+    def setStatus(self, status: str):
+        if not isinstance(status, str):
+            raise ValueError("Project status must be a string.")
 
-        if len(description) > self.MAX_DESCRIPTION_LENGTH:
-            error = f"Project description length must be under {self.MAX_DESCRIPTION_LENGTH}."
+        if len(status) > self.MAX_DESCRIPTION_LENGTH:
+            error = f"Project status length must be under {self.MAX_DESCRIPTION_LENGTH}."
             raise ValueError(error)
 
-        self.__description = description
+        self.__status = status
 
     def __setStartDate(self, start_date: date):
         if not isinstance(start_date, date):
@@ -74,8 +73,8 @@ class PublicWork(Model):
     def getTitle(self) -> str:
         return self.__title
 
-    def getDescription(self) -> str:
-        return self.__description
+    def getStatus(self) -> str:
+        return self.__status
 
     def getStartDate(self) -> date:
         return self.__start_date
@@ -92,11 +91,11 @@ class PublicWork(Model):
     def getData(self) -> dict:
         return {
             "title": self.getTitle(),
-            "description": self.getDescription(),
             "start_date": self.getStartDate(),
             "location_id": self.getLocationId(),
             "government_id": self.getGovernmentId(),
-            "corporate_id": self.getCorporateId()
+            "corporate_id": self.getCorporateId(),
+            "status": self.getStatus()
         }
 
     @classmethod
@@ -112,7 +111,7 @@ class PublicWork(Model):
 
         return [PublicWork.instanceFromDatabaseRow(row) for row in rows]
 
-    def getDocumentsList(self) -> list[Document]:
+    def listDocuments(self) -> list[Document]:
 
         tb_documents = Document.TABLE_NAME
         public_work_id_match = f"public_work_id = {self.getId()}"
@@ -124,9 +123,21 @@ class PublicWork(Model):
 
     def listColumns(self) -> list[Column]:
         tb_column = Column.TABLE_NAME
-        public_work_match = f"column_id = {self.getId()}"
+        public_work_match = f"public_work_id = {self.getId()}"
         rows = Database.select(_from=tb_column, where=public_work_match)
         return [Column.instanceFromDatabaseRow(row) for row in rows]
+
+    def listCards(self) -> list[Card]:
+        tb_card = Card.TABLE_NAME
+        public_work_match = f"public_work_id = {self.getId()}"
+        rows = Database.select(_from=tb_card, where=public_work_match)
+        return [Card.instanceFromDatabaseRow(row) for row in rows]
+
+    def getColumnByPosition(self, position: int) -> Column:
+        tb_column = Column.TABLE_NAME
+        public_work_match = f"column_id = {self.getId()} AND position = {position}"
+        row = Database.select(_from=tb_column, where=public_work_match)
+        return Column.instanceFromDatabaseRow(row)
 
     def insertColumn(self, name: str, position: int):
 
@@ -139,43 +150,8 @@ class PublicWork(Model):
 
         Column(name, position, self.getId()).pushDatabase()
 
-        self.incrementAllColumnPositionsFrom(position)
-
     def length(self) -> int:
         return len(self.listColumns())
 
     def isValidPosition(self, position: int) -> bool:
         return 0 < position <= self.length()
-
-    def removeColumnAt(self, position: int) -> None:
-
-        if not self.isValidPosition(position):
-            error = "Unable to delete card, Position is out of bounds."
-            raise ValueError(error)
-
-        self.incrementAllColumnPositionsFrom(position, increment=-1)
-        columns_list = self.getColumnsList()
-
-        index = position - 1
-        column = columns_list[index]
-
-        columns_list.remove(column)
-        self.setColumnsList(columns_list)
-
-        column.delete()
-
-    def incrementAllColumnPositionsFrom(self, position: int, increment: int = 1):
-
-        if not self.isValidPosition(position):
-            raise ValueError("Provided 'position' value is out of bounds")
-
-        public_work_id = self.getId()
-        tb_column = Column.TABLE_NAME
-
-        new_position = {"position": f"position + {increment}"}
-
-        public_work_id_match = f"public_work_id = {public_work_id}"
-        position_is_more_or_equal = f"position >= {position}"
-
-        Database.update(tb_column, _with=new_position,
-                        where=f"{public_work_id_match} AND {position_is_more_or_equal}")

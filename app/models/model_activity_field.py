@@ -1,7 +1,4 @@
-from app.db.database_connection import Database
 from app.models.model_template import Model
-from app.models.model_public_work import PublicWork
-from app.models.model_corporate_user import Corporate
 
 
 class ActivityField(Model):
