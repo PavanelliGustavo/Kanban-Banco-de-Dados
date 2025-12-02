@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import mock_db
+import re # Para regex
 
 class KanbanViewFrame(tk.Frame):
 
@@ -35,23 +36,20 @@ class KanbanViewFrame(tk.Frame):
         header_frame = tk.Frame(self.main_content, bg="#f0f0f0")
         header_frame.pack(fill="x", pady=(0, 20))
 
-        # LADO ESQUERDO (Voltar + Título)
         left_frame = tk.Frame(header_frame, bg="#f0f0f0")
         left_frame.pack(side="left", fill="y")
 
         def back():
             if self.controller.user_type == "empresa":
-                # Volta para o dashboard da empresa (que se auto-carrega)
                 self.controller.show_obras_frame()
             else:
-                # Volta para o dashboard civil (precisa achar a empresa dona da obra para passar os dados)
                 obra = next((o for o in mock_db.OBRAS_DB if o['id'] == self.current_work_id), None)
                 if obra:
                     emp = next((e for e in mock_db.EMPRESAS_DB if e['nome'] == obra['empresa']), None)
                     if emp:
                         self.controller.show_obras_frame(emp['nome'], emp['cnpj'], emp['email'])
                     else:
-                        self.controller.show_frame("EmpresasCivilFrame") # Fallback
+                        self.controller.show_frame("EmpresasCivilFrame")
 
         tk.Button(left_frame, text="< Voltar", command=back, bg="#ddd", bd=0, padx=10).pack(side="left")
         
@@ -59,21 +57,15 @@ class KanbanViewFrame(tk.Frame):
         tk.Label(left_frame, text=f"{title_prefix}{self.current_work_name}", 
                  font=("Comic Sans MS", 18, "bold"), bg="#f0f0f0", fg="#333").pack(side="left", padx=20)
 
-        # LADO DIREITO (Botões Condicionais)
         right_frame = tk.Frame(header_frame, bg="#f0f0f0")
         right_frame.pack(side="right")
 
         if self.controller.user_type == "empresa":
-            # --- LAYOUT EMPILHADO PARA EMPRESA ---
-            # Botão Documentos (Em cima)
             tk.Button(right_frame, text="Acessar Documentos da Obra", 
                       command=self.open_docs, bg="#607D8B", fg="white", font=("bold"), width=25, pady=5).pack(side="top", pady=(0, 5))
-            
-            # Botão Adicionar Card (Embaixo)
-            tk.Button(right_frame, text="+ ADICIONAR CARD", 
+            tk.Button(right_frame, text="+ Adicionar Card", 
                       command=self.open_create_card_modal, bg="#2196F3", fg="white", font=("bold"), width=25, pady=5).pack(side="bottom")
         else:
-            # --- LAYOUT SIMPLES PARA CIVIL ---
             tk.Button(right_frame, text="Documentos da Obra", 
                       command=self.open_docs, bg="#607D8B", fg="white", padx=10).pack()
 
@@ -114,13 +106,13 @@ class KanbanViewFrame(tk.Frame):
         modal.configure(bg="white")
         modal.grab_set()
 
-        # Detalhes do Card (Visualização)
         tk.Label(modal, text=task['titulo'], font=("Helvetica", 16, "bold"), bg="white", fg="#2196F3", wraplength=380).pack(pady=20)
         
         info = tk.Frame(modal, bg="white", padx=20)
         info.pack(fill="x")
         
-        for k, v in [("Status:", task['status']), ("Responsável:", task.get('responsavel', '-')), ("Previsão:", task.get('previsao', '-'))]:
+        # REMOVIDO RESPONSAVEL, RENOMEADO PREVISÃO -> PRAZO, STATUS -> COLUNAS
+        for k, v in [("Colunas:", task['status']), ("Prazo:", task.get('previsao', '-'))]:
             row = tk.Frame(info, bg="white")
             row.pack(fill="x", pady=2)
             tk.Label(row, text=k, font=("bold", 10), bg="white", width=12, anchor="w").pack(side="left")
@@ -130,7 +122,6 @@ class KanbanViewFrame(tk.Frame):
         desc = tk.Label(modal, text=task.get('descricao_completa', ''), bg="#f9f9f9", wraplength=360, justify="left", relief="solid", bd=1)
         desc.pack(fill="both", expand=True, padx=20, pady=5)
 
-        # BOTÕES DE AÇÃO (Visíveis apenas para empresa)
         if self.controller.user_type == "empresa":
             btn_frame = tk.Frame(modal, bg="white")
             btn_frame.pack(fill="x", pady=20, padx=20)
@@ -169,14 +160,13 @@ class KanbanViewFrame(tk.Frame):
 
         val_t = "" if is_new else task_data['titulo']
         val_s = "Em Planejamento" if is_new else task_data['status']
-        val_r = "" if is_new else task_data.get('responsavel', '')
+        # val_r REMOVIDO
         val_p = "" if is_new else task_data.get('previsao', '')
         val_d = "" if is_new else task_data.get('descricao_completa', '')
 
         add_field("Título", "titulo", val_t)
-        add_field("Status", "status", val_s, "combo", ["Em Planejamento", "Em Andamento", "Em Verificação", "Concluído"])
-        add_field("Responsável", "responsavel", val_r)
-        add_field("Previsão", "previsao", val_p)
+        add_field("Colunas", "status", val_s, "combo", ["Em Planejamento", "Em Andamento", "Em Verificação", "Concluído"])
+        add_field("Prazo", "previsao", val_p) # Rótulo atualizado
         add_field("Descrição", "descricao", val_d, "text")
 
         tk.Button(modal, text="SALVAR", bg="#4CAF50", fg="white", font=("bold"), pady=10,
@@ -199,15 +189,31 @@ class KanbanViewFrame(tk.Frame):
             if action == "delete":
                 mock_db.KANBAN_TASKS_DB.remove(task_data)
             elif action == "save":
+                # --- VALIDAÇÃO DE CAMPOS (NOVA) ---
+                t = entries['titulo'].get().strip()
+                s = entries['status'].get().strip()
+                p = entries['previsao'].get().strip()
+                d = entries['descricao'].get("1.0", "end-1c").strip()
+
+                if not t or not s or not p or not d:
+                    popup.destroy()
+                    messagebox.showwarning("Erro", "Todos os campos (Título, Coluna, Prazo, Descrição) são obrigatórios.", parent=parent_modal)
+                    return
+                
+                # --- VALIDAÇÃO DE DATA (REGEX) ---
+                if not re.match(r"^\d{2}/\d{2}/\d{4}$", p):
+                    popup.destroy()
+                    messagebox.showwarning("Erro", "O Prazo deve estar no formato NN/NN/NNNN (Ex: 01/12/2023).", parent=parent_modal)
+                    return
+
                 new_data = {
-                    "titulo": entries['titulo'].get(),
-                    "status": entries['status'].get(),
-                    "responsavel": entries['responsavel'].get(),
-                    "previsao": entries['previsao'].get(),
-                    "descricao_completa": entries['descricao'].get("1.0", "end-1c").strip()
+                    "titulo": t,
+                    "status": s,
+                    # Responsável removido
+                    "previsao": p,
+                    "descricao_completa": d
                 }
                 if is_new:
-                    # Gera ID novo simples
                     new_id = 999 
                     if mock_db.KANBAN_TASKS_DB:
                          new_id = max(t['id'] for t in mock_db.KANBAN_TASKS_DB) + 1
