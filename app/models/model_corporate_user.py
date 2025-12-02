@@ -1,5 +1,6 @@
 from pathlib import Path
 from app.db.database_connection import Database
+from app.models.model_public_work import PublicWork
 from app.models.model_user import AuthenticatedUser
 
 
@@ -50,6 +51,13 @@ class Corporate(AuthenticatedUser):
         if not all(isinstance(_id, int) for _id in list_of_ids):
             raise ValueError("All IDs in 'list_of_ids' must be integers.")
         self.__activity_fields = list_of_ids
+
+    def listPublicWorks(self) -> list[PublicWork]:
+        tb_public_work = PublicWork.TABLE_NAME
+        corporate_match = f"id = {self.getId()}"
+        rows = Database.select(_from=tb_public_work,
+                               where=corporate_match)
+        return [PublicWork.instanceFromDatabaseRow(row) for row in rows]
 
     def getCnpj(self) -> str:
         return self.__cnpj

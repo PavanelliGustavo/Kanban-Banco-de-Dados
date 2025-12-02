@@ -81,22 +81,6 @@ class Column(Model):
     def isValidPosition(self, position: int) -> bool:
         return 0 < position <= self.length()
 
-    def incrementAllCardPositionsFrom(self, position: int, increment: int = 1):
-
-        if not self.isValidPosition(position):
-            raise ValueError("Provided 'position' value is out of bounds")
-
-        column_id = self.getId()
-        tb_card = Card.TABLE_NAME
-
-        new_position = {"position": f"position + {increment}"}
-
-        column_id_match = f"column_id = {column_id}"
-        position_is_more_or_equal = f"position >= {position}"
-
-        Database.update(tb_card, _with={"position": new_position},
-                        where=f"{column_id_match} AND {position_is_more_or_equal}")
-
     def insertCard(self, card: Card, position: int):
 
         if position < 1:
@@ -109,5 +93,3 @@ class Column(Model):
         card.setColumnId(self.getId())
         card.setPosition(position)
         card.pushDatabase()
-
-        self.incrementAllCardPositionsFrom(position)

@@ -1,6 +1,6 @@
 import tkinter as tk
 from app.views.login import LoginScreen
-from app.views.search_companies import CompaniesSearchScreen
+from app.views.corporates_search import CompaniesSearchScreen
 
 
 class App(tk.Tk):
