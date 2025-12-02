@@ -13,8 +13,27 @@ OBRAS_DB = [
     {"id": 201, "empresa": "Pavimentação Estrela do Sul", "nome": "Ciclovia da Orla", "local": "Litoral - RJ", "status": "Em Andamento", "data_inicio": "2023-05-10"},
 ]
 
+# NOVA LISTA: Colunas do Kanban (Dinâmicas)
+# Inicializamos com as colunas padrão para as obras existentes
+COLUMNS_DB = [
+    # Obra 101
+    {"id": 1, "obra_id": 101, "titulo": "Em Planejamento", "posicao_visual": 1},
+    {"id": 2, "obra_id": 101, "titulo": "Em Andamento", "posicao_visual": 2},
+    {"id": 3, "obra_id": 101, "titulo": "Em Verificação", "posicao_visual": 3},
+    {"id": 4, "obra_id": 101, "titulo": "Concluído", "posicao_visual": 4},
+    # Obra 102
+    {"id": 5, "obra_id": 102, "titulo": "Em Planejamento", "posicao_visual": 1},
+    {"id": 6, "obra_id": 102, "titulo": "Em Andamento", "posicao_visual": 2},
+    {"id": 7, "obra_id": 102, "titulo": "Em Verificação", "posicao_visual": 3},
+    {"id": 8, "obra_id": 102, "titulo": "Concluído", "posicao_visual": 4},
+    # Obra 201
+    {"id": 9, "obra_id": 201, "titulo": "Em Planejamento", "posicao_visual": 1},
+    {"id": 10, "obra_id": 201, "titulo": "Em Andamento", "posicao_visual": 2},
+    {"id": 11, "obra_id": 201, "titulo": "Em Verificação", "posicao_visual": 3},
+    {"id": 12, "obra_id": 201, "titulo": "Concluído", "posicao_visual": 4},
+]
+
 # Lista: Tarefas/Cards do Kanban
-# ATUALIZADO: Adicionado campo 'posicao' para ordenação vertical na coluna
 KANBAN_TASKS_DB = [
     # Tarefas da Obra 101 (Escola)
     {
@@ -56,7 +75,7 @@ KANBAN_TASKS_DB = [
     },
 ]
 
-# NOVA LISTA: Documentos Oficiais (A QUE FALTAVA)
+# Lista: Documentos Oficiais
 DOCUMENTS_DB = [
     {"id": 1, "obra_id": 101, "titulo": "Contrato de Prestação de Serviços - Nº 123/2023", "tipo": "PDF", "data": "2023-01-10", "caminho": "/docs/contrato_123.pdf"},
     {"id": 2, "obra_id": 101, "titulo": "Planta Baixa Aprovada", "tipo": "PDF", "data": "2023-01-12", "caminho": "/docs/planta_escola.pdf"},
