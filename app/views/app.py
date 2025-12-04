@@ -5,6 +5,11 @@ from app.views.kanban_view import KanbanViewFrame
 from app.views.docs_view import DocsViewFrame
 from app.views.empresas_civil import EmpresasCivilFrame
 
+# --- NOVAS IMPORTAÇÕES (Views Governamentais) ---
+# Certifique-se de que os arquivos estão na pasta app/views/
+from app.views.gov_central_view import GovCentralViewFrame
+from app.views.gov_user_selection_view import GovUsersSelectionView
+from app.views.gov_crud_menu_view import GovCRUDMenuView
 
 class App(tk.Tk):
 
@@ -23,8 +28,9 @@ class App(tk.Tk):
         # --- ESTADO DO USUÁRIO ---
         # "civil" = Apenas Leitura
         # "empresa" = Leitura e Escrita
+        # "governo" = Administrador
         self.user_type = None
-        self.user_id = None   # ID da empresa logada (se for empresa)
+        self.user_id = None   # ID do usuário logado
 
         self.setUpWindow()
         self.setUpContainer()
@@ -48,8 +54,16 @@ class App(tk.Tk):
     def registerFrames(self):
         self.frames = {}
 
-        # Registramos apenas as views originais. A lógica interna delas mudará conforme o user_type.
-        for F in (LoginFrame, EmpresasCivilFrame, ObrasEmpresaFrame, KanbanViewFrame, DocsViewFrame):
+        # Lista atualizada com TODAS as views do sistema
+        for F in (LoginFrame, 
+                  EmpresasCivilFrame, 
+                  ObrasEmpresaFrame, 
+                  KanbanViewFrame, 
+                  DocsViewFrame,
+                  GovCentralViewFrame,      # Novo
+                  GovUsersSelectionView,    # Novo
+                  GovCRUDMenuView):         # Novo
+            
             page_name = F.__name__
             frame = F(parent=self.container, controller=self)
             self.frames[page_name] = frame
@@ -89,3 +103,16 @@ class App(tk.Tk):
         frame = self.frames["DocsViewFrame"]
         frame.update_view(work_id, work_name)
         frame.tkraise()
+
+    # --- NOVO MÉTODO DE NAVEGAÇÃO GOVERNAMENTAL ---
+    def show_gov_crud_frame(self, user_type_target):
+        """
+        Navega para o menu de CRUD (GovCRUDMenuView).
+        Args:
+            user_type_target (str): "Governamental" ou "Empresarial"
+        """
+        frame = self.frames["GovCRUDMenuView"]
+        frame.update_view(user_type_target)
+        frame.tkraise()
+
+    # endregion
