@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
 from app.models.model_corporate_user import Corporate
-
+from app.models.model_government_user import Government  
 
 class LoginFrame(tk.Frame):
 
-    # region ---------------- ESTILOS (Simplificados para leitura) ----------------
+    # region ---------------- ESTILOS ----------------
     WINDOW_BACKGROUND_COLOR = "#f0f0f0"
     TEXT_FONT = "Helvetica"
     # endregion
@@ -33,7 +33,7 @@ class LoginFrame(tk.Frame):
             self.selected_profile.set(profile)
             self.update_login_area(profile)
 
-        # Botões
+        # Botões Coloridos
         tk.Button(btn_frame, text="CIVIL", command=lambda: select("civil"), bg="#4CAF50",
                   fg="white", width=15, font=("bold"), pady=5).grid(row=0, column=0, padx=10)
         tk.Button(btn_frame, text="EMPRESA", command=lambda: select("empresa"), bg="#2196F3",
@@ -88,36 +88,73 @@ class LoginFrame(tk.Frame):
     def performLogin(self):
         profile = self.selected_profile.get()
 
+        # 1. Fluxo CIVIL
         if profile == "civil":
-            # Configura como Civil e vai para lista de empresas
             self.controller.user_type = "civil"
             self.controller.show_frame("EmpresasCivilFrame")
 
+        # 2. Fluxo EMPRESA
         elif profile == "empresa":
-            email = self.entry_email.get()
-            password = self.entry_pass.get()
+            self.authenticate_corporate()
 
-            if not email or not password:
-                messagebox.showwarning("Erro", "Preencha todos os campos.")
-                return
+        # 3. Fluxo GOVERNO
+        elif profile == "governo":
+            self.authenticate_government()
 
+    def authenticate_corporate(self):
+        email = self.entry_email.get()
+        password = self.entry_pass.get()
+
+        if not email or not password:
+            messagebox.showwarning("Erro", "Preencha todos os campos.")
+            return
+
+        try:
             corporates: list[Corporate] = Corporate.listAll()
-
             corporate_match = next(
                 (corp for corp in corporates if corp.getEmail() == email), None)
 
             if not corporate_match or not corporate_match.checkPassword(password):
-                messagebox.showwarning("Erro", "Senha incorreta.")
+                messagebox.showwarning("Erro", "Credenciais de Empresa inválidas.")
                 return
 
             self.controller.user_type = "empresa"
             self.controller.user_id = corporate_match.getId()
 
-            # Vai DIRETO para o painel da empresa, passando os dados dela
             self.controller.show_obras_frame(
                 nome=corporate_match.getCompanyName(),
                 cnpj=corporate_match.getCnpj(),
                 email=corporate_match.getEmail()
             )
-        else:
-            messagebox.showinfo("Aviso", "Módulo Governo em desenvolvimento.")
+        except Exception as e:
+             messagebox.showerror("Erro", f"Erro ao conectar com banco: {e}")
+
+    def authenticate_government(self):
+        email = self.entry_email.get()
+        password = self.entry_pass.get()
+
+        if not email or not password:
+            messagebox.showwarning("Erro", "Preencha todos os campos.")
+            return
+
+        try:
+            # Tenta buscar a lista de governos do Banco de Dados
+            # Se der erro aqui, certifique-se que o método listAll() existe no model_government_user.py
+            governments: list[Government] = Government.listAll()
+            
+            gov_match = next((gov for gov in governments if gov.getEmail() == email), None)
+
+            if not gov_match or not gov_match.checkPassword(password):
+                messagebox.showwarning("Erro", "Credenciais do Governo inválidas.")
+                return
+
+            # Login Sucesso
+            self.controller.user_type = "governo"
+            self.controller.user_id = gov_match.getId() 
+
+            self.controller.show_frame("GovCentralViewFrame")
+            
+        except Exception as e:
+            # Se cair aqui e o erro for 'listAll', verifique seu model
+            messagebox.showerror("Erro Crítico", f"Falha ao conectar com tabela Government: {e}")
+            

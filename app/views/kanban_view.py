@@ -218,6 +218,9 @@ class KanbanViewFrame(tk.Frame):
         modal.title(f"Detalhes: {task.getTitle()}")
         modal.geometry("400x550")
         modal.configure(bg=self.MODAL_BG)
+        
+        # CORREÇÃO: Espera a janela ser desenhada antes de travar o foco (Evita tela branca)
+        modal.wait_visibility() 
         modal.grab_set()
 
         pos = task.getPosition()
@@ -268,6 +271,9 @@ class KanbanViewFrame(tk.Frame):
         modal.title(title)
         modal.geometry("400x650")
         modal.configure(bg=self.MODAL_BG)
+        
+        # CORREÇÃO: Espera a janela ser desenhada antes de travar o foco
+        modal.wait_visibility()
         modal.grab_set()
 
         tk.Label(modal, text=title, font=self.MODAL_TITLE_FONT, bg=self.MODAL_BG).pack(pady=15)
@@ -324,6 +330,9 @@ class KanbanViewFrame(tk.Frame):
         modal.title(title_text)
         modal.geometry("350x350")
         modal.configure(bg=self.MODAL_BG)
+        
+        # CORREÇÃO: Espera a janela ser desenhada antes de travar o foco
+        modal.wait_visibility()
         modal.grab_set()
 
         tk.Label(modal, text=title_text, font=self.MODAL_TITLE_FONT, bg=self.MODAL_BG, fg=self.ACTION_BTN_COL_BG).pack(pady=20)
@@ -449,7 +458,8 @@ class KanbanViewFrame(tk.Frame):
                 obra = next((o for o in all_works if o.getId() == self.current_work_id), None)
                 if obra:
                     corp_id = obra.getCorporateId()
-                    self.controller.show_obras_frame(corporate_id=corp_id)
+                    # self.controller.show_obras_frame(corporate_id=corp_id) # Linha comentada pois show_obras_frame não espera corporate_id como argumento nomeado
+                    self.controller.show_obras_frame(nome=None, cnpj=None, email=None) # Ajuste seguro para voltar
                 else:
                     self.controller.show_frame("EmpresasCivilFrame")
             except:
