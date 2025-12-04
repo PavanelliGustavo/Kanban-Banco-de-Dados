@@ -347,7 +347,8 @@ class Database:
 
     @classmethod
     def __toSQL(cls, value: Any) -> str:
-
+        if isinstance(value, bytes):
+            return 
         if value is None:
             return "NULL"
         if isinstance(value, bool):
