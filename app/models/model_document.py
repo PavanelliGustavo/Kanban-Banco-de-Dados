@@ -13,12 +13,14 @@ class Document(Model):
     def __init__(self,
                  title: str,
                  file_data: bytes,
+                 upload_date: date,
                  public_work_id: int,
                  government_id: int,
                  corporate_id: int) -> None:
 
         self.setTitle(title)
         self.setFileData(file_data)
+        self.__setUploadDate(upload_date)
         self.__setPublicWorkId(public_work_id)
         self.__setGovernmentId(government_id)
         self.__setCorporateId(corporate_id)
@@ -55,9 +57,10 @@ class Document(Model):
 
         self.__title = title
 
-    def setFileData(self, file_data: bytes):
+    def setFileData(self, raw_file_data: bytes):
+        file_data = bytes(raw_file_data)
         if not isinstance(file_data, bytes):
-            raise ValueError("Document file_data must be bytes.")
+            raise ValueError(f"Document file_data must be bytes, not {type(file_data)}.")
 
         if len(file_data) == 0:
             raise ValueError("Document file_data cannot be empty.")
@@ -69,9 +72,8 @@ class Document(Model):
 
         self.__file_data = file_data
 
-    def setUploadDate(self):
-
-        self.__upload_date = datetime.now().date()
+    def __setUploadDate(self, upload_date: date):
+        self.__upload_date = upload_date
 
     def getData(self) -> dict:
         return {
