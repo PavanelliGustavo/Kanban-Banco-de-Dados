@@ -31,7 +31,7 @@ class Model(ABC):
         if not id:
             raise RuntimeError("Failed to retreive id from SQL insertion.")
 
-        self._setId(int(id))
+        self._id = int(id)
 
     def _updateInDatabase(self):
         """ Atualiza a linha do banco de dados referente à instância. Serve para sincronizar as informações do BD com as do objeto.
@@ -44,16 +44,14 @@ class Model(ABC):
                         where=f"id = {self.getId()}")
 
     @classmethod
-    def instanceFromDatabaseRow(cls, row: list | tuple):
+    def instanceFromDatabaseRow(cls, row: Iterable):
         """Realiza o unpacking de um Iterable (listas, tuplas, etc), ou seja, passa os elementos do Iterable como argumentos individuais
            para o construtor da classe e retorna uma instância.
 
            Ex: Para um construtor `Construtor(valor1, valor2, valor3, valor4)` poderiamos
            pegar uma `tupla = (a, b, c, d)` e chamar 'Construtor' da seguinte forma `Construtor(*tupla)`, que é equivalente a `Construtor(a, b, c, d)`
         """
-        instance = cls(*row[1:])
-        instance._setId(row[0])
-        return instance
+        return cls(*row)
 
     def delete(self):
         Database.delete(_from=self.TABLE_NAME, where=f"id = {self.getId()}")
@@ -62,20 +60,10 @@ class Model(ABC):
         """ Retorna o id da instância """
         return self._id
 
-    def _setId(self, id: int):
-        self._id = id
-
-    @classmethod
-    def listAll(cls) -> list["Model"]:
-        tb = cls.TABLE_NAME
-        rows = Database.select(_from=tb)
-        return [cls.instanceFromDatabaseRow(row) for row in rows]
-
     @classmethod
     def getById(cls, id: int) -> "Model":
-        attrs = Database.select(_from=cls.TABLE_NAME, where=f"id = {id}")
-        attrs = attrs if not isinstance(attrs, Iterable) else attrs[0]
-        return cls.instanceFromDatabaseRow(attrs)
+        attrs = Database.select(_from=cls.TABLE_NAME, where=f"id = {id}")[0]
+        return cls.__init__(*attrs)
 
     @abstractmethod
     def getData(self) -> dict:
