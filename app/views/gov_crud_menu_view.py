@@ -1,223 +1,267 @@
 import tkinter as tk
-from tkinter import messagebox
-import random # Apenas para simular dados aleatórios na visualização
+from tkinter import messagebox, simpledialog
+from app.db.database_connection import Database
 
 class GovCRUDMenuView(tk.Frame):
 
-    # region ---------------- WINDOW VARIABLES ----------------
-    WINDOW_BACKGROUND_COLOR = "#f0f0f0"
-    TEXT_FONT = "Helvetica"
-    # endregion
-
-    # region ---------------- HEADER VARIABLES ----------------
-    HEADER_BG = "#f0f0f0"
-    TITLE_FONT = (TEXT_FONT, 20, "bold")
-    TITLE_FG = "#333"
-    # endregion
-
-    # region ---------------- BUTTONS VARIABLES ----------------
-    BTN_WIDTH = 32
-    BTN_HEIGHT = 6
-    BTN_FONT = (TEXT_FONT, 14, "bold")
-    BTN_FG = "white"
+    # region ---------------- CONFIGURAÇÕES VISUAIS ----------------
+    WINDOW_BG = "#f0f0f0"
     
-    BTN_COLOR_1 = "#673AB7" # Roxo
-    BTN_COLOR_2 = "#009688" # Verde Mar
+    # Cores baseadas nas suas imagens
+    COLOR_PRIMARY = "#2196F3"    # Azul (Títulos)
+    COLOR_SUCCESS = "#4CAF50"    # Verde (Criar/Salvar)
+    COLOR_WARNING = "#FF9800"    # Laranja (Editar)
+    COLOR_DANGER = "#F44336"     # Vermelho (Excluir)
+    COLOR_NEUTRAL = "#9E9E9E"    # Cinza (Fechar/Voltar)
     
-    BTN_BORDER_PARAMS = {"bd": 0}
-    BTN_CURSOR = "hand2"
-    # endregion
-
-    # region ---------------- MODAL STYLE ----------------
-    MODAL_BG = "white"
-    MODAL_FONT_LABEL = (TEXT_FONT, 10, "bold")
-    MODAL_FONT_ENTRY = (TEXT_FONT, 10)
-    MODAL_BTN_BG = "#4CAF50" # Verde para ações positivas
-    MODAL_BTN_FG = "white"
+    FONT_TITLE = ("Helvetica", 18, "bold")
+    FONT_LABEL = ("Helvetica", 10)
+    FONT_ENTRY = ("Helvetica", 10)
     # endregion
 
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        self.configure(bg=self.WINDOW_BACKGROUND_COLOR)
+        self.configure(bg=self.WINDOW_BG)
         
-        self.content = tk.Frame(self, bg=self.WINDOW_BACKGROUND_COLOR)
-        self.content.pack(fill="both", expand=True, padx=40, pady=40)
+        # Variáveis de Estado
+        self.current_user_type = "" # "Governamental" ou "Empresarial"
         
-        self.current_user_type = ""
-        self.createWidgets()
+        self.create_widgets()
 
     def update_view(self, user_type):
+        """Chamado pelo controller ao entrar na tela"""
         self.current_user_type = user_type
-        self.title_label.config(text=f"Gerenciar {user_type}")
+        if hasattr(self, 'lbl_main_title'):
+            self.lbl_main_title.config(text=f"Gerenciar: {user_type}")
 
-    def createWidgets(self):
-        self.setUpHeader()
-        self.setUpCRUDButtons()
-
-    def setUpHeader(self):
-        header = tk.Frame(self.content, bg=self.HEADER_BG)
-        header.pack(fill="x", pady=(0, 40))
+    def create_widgets(self):
+        # --- HEADER ---
+        header = tk.Frame(self, bg=self.WINDOW_BG)
+        header.pack(fill="x", pady=20, padx=20)
         
-        header.grid_columnconfigure(0, weight=0)
-        header.grid_columnconfigure(1, weight=1)
-        header.grid_columnconfigure(2, weight=0)
+        btn_back = tk.Button(header, text="< Voltar", bg="#ddd", bd=0, padx=15, pady=5,
+                             command=lambda: self.controller.show_frame("GovUsersSelectionView"))
+        btn_back.pack(side="left")
 
-        tk.Button(header, text="< Voltar", bg="#ddd", bd=0, padx=10, pady=5,
-                  command=lambda: self.controller.show_frame("GovUsersSelectionView")).grid(row=0, column=0, sticky="w")
-        
-        self.title_label = tk.Label(header, text="Gerenciar ...", font=self.TITLE_FONT, bg=self.HEADER_BG, fg=self.TITLE_FG)
-        self.title_label.grid(row=0, column=1)
+        self.lbl_main_title = tk.Label(header, text="Gerenciar", font=("Helvetica", 20, "bold"), 
+                                       bg=self.WINDOW_BG, fg="#333")
+        self.lbl_main_title.pack(side="left", padx=20)
 
-        tk.Label(header, text="< Voltar", bg=self.HEADER_BG, fg=self.HEADER_BG, padx=10).grid(row=0, column=2)
+        # --- BOTÕES DO MENU (GRID) ---
+        container_btns = tk.Frame(self, bg=self.WINDOW_BG)
+        container_btns.pack(expand=True)
 
-    def setUpCRUDButtons(self):
-        grid_container = tk.Frame(self.content, bg=self.WINDOW_BACKGROUND_COLOR)
-        grid_container.pack(expand=True)
+        # Configuração dos botões principais
+        btn_opts = {
+            "font": ("Helvetica", 12, "bold"), 
+            "fg": "white", 
+            "width": 25, 
+            "height": 3, 
+            "bd": 0, 
+            "cursor": "hand2"
+        }
 
-        buttons = [
-            ("Criar", lambda: self.openFormModal("create"), self.BTN_COLOR_1),
-            ("Atualizar", lambda: self.openFormModal("update"), self.BTN_COLOR_2),
-            ("Visualizar", lambda: self.openFormModal("read"), self.BTN_COLOR_2),
-            ("Deletar", self.actionDelete, self.BTN_COLOR_1)
-        ]
+        # Criação dos botões
+        # Criar -> Abre modal vazio
+        tk.Button(container_btns, text="CRIAR NOVO", bg=self.COLOR_SUCCESS, command=lambda: self.open_modal("create"), **btn_opts)\
+            .grid(row=0, column=0, padx=20, pady=20)
 
-        for i, (text, cmd, bg_color) in enumerate(buttons):
-            row = i // 2
-            col = i % 2
-            btn = tk.Button(grid_container, text=text, command=cmd,
-                            bg=bg_color, fg=self.BTN_FG, font=self.BTN_FONT,
-                            width=self.BTN_WIDTH, height=self.BTN_HEIGHT,
-                            cursor=self.BTN_CURSOR, **self.BTN_BORDER_PARAMS)
-            btn.grid(row=row, column=col, padx=40, pady=30)
+        # Editar -> Pede ID -> Abre modal preenchido
+        tk.Button(container_btns, text="EDITAR EXISTENTE", bg=self.COLOR_WARNING, command=lambda: self.ask_id_and_open("update"), **btn_opts)\
+            .grid(row=0, column=1, padx=20, pady=20)
 
-    # region ---------------- FORM MODAL LOGIC ----------------
+        # Visualizar -> Pede ID -> Abre modal travado
+        tk.Button(container_btns, text="VISUALIZAR DADOS", bg=self.COLOR_PRIMARY, command=lambda: self.ask_id_and_open("read"), **btn_opts)\
+            .grid(row=1, column=0, padx=20, pady=20)
 
-    def openFormModal(self, action_type):
+        # Excluir -> Pede ID -> Deleta
+        tk.Button(container_btns, text="EXCLUIR REGISTRO", bg=self.COLOR_DANGER, command=self.delete_record, **btn_opts)\
+            .grid(row=1, column=1, padx=20, pady=20)
+
+
+    # region ---------------- LÓGICA DE BANCO DE DADOS ----------------
+
+    def fetch_data(self, record_id):
+        """Busca os dados baseados no tipo de usuário atual"""
+        try:
+            if self.current_user_type == "Governamental":
+                query = f"SELECT id, department_name, email, password FROM tb_government WHERE id = {record_id}"
+                rows = Database.select(query)
+                if rows:
+                    return {"id": rows[0][0], "dept_name": rows[0][1], "email": rows[0][2], "password": rows[0][3]}
+            
+            elif self.current_user_type == "Empresarial":
+                query = f"SELECT id, company_name, cnpj, email, password FROM tb_corporate WHERE id = {record_id}"
+                rows = Database.select(query)
+                if rows:
+                    return {"id": rows[0][0], "name": rows[0][1], "cnpj": rows[0][2], "email": rows[0][3], "password": rows[0][4]}
+            
+            return None
+        except Exception as e:
+            messagebox.showerror("Erro de DB", f"Falha na busca: {e}")
+            return None
+
+    def delete_record(self):
+        record_id = simpledialog.askinteger("Excluir", "Informe o ID para excluir:")
+        if not record_id: return
+
+        if not messagebox.askyesno("Atenção", "Tem certeza? Essa ação não pode ser desfeita."):
+            return
+
+        table = "tb_government" if self.current_user_type == "Governamental" else "tb_corporate"
+        try:
+            Database.execute(f"DELETE FROM {table} WHERE id = {record_id}")
+            messagebox.showinfo("Sucesso", "Registro removido.")
+        except Exception as e:
+            messagebox.showerror("Erro", str(e))
+
+    # endregion
+
+
+    # region ---------------- MODAL (POP-UP) ----------------
+
+    def ask_id_and_open(self, mode):
+        """Passo intermediário para Ler e Editar: Pede o ID antes de abrir o modal"""
+        record_id = simpledialog.askinteger("Buscar", f"Informe o ID do usuário para {mode}:")
+        if not record_id: return
+
+        data = self.fetch_data(record_id)
+        if data:
+            self.open_modal(mode, data)
+        else:
+            messagebox.showwarning("Não encontrado", "Nenhum registro encontrado com este ID.")
+
+    def open_modal(self, mode, data=None):
         """
-        Abre o formulário modal configurado para Criar, Ler ou Atualizar.
-        action_type: 'create', 'read', 'update'
+        mode: 'create', 'update', 'read'
+        data: dict com os dados (se update/read)
         """
         
-        # Configuração da Janela
+        # Configuração da Janela Modal
         modal = tk.Toplevel(self)
-        title_map = {"create": "Criar Novo Usuário", "read": "Visualizar Usuário", "update": "Atualizar Usuário"}
-        modal.title(f"{title_map[action_type]} - {self.current_user_type}")
-        modal.geometry("450x500")
-        modal.configure(bg=self.MODAL_BG)
+        modal.title(f"{mode.upper()} - {self.current_user_type}")
+        modal.geometry("400x550")
+        modal.configure(bg="white")
+        modal.grab_set() # Foca no modal impedindo clique atrás
+
+        # Variáveis de Controle (Tkinter Variables)
+        vars_dict = {
+            "dept_name": tk.StringVar(value=data['dept_name'] if data else ""),
+            "cnpj": tk.StringVar(value=data['cnpj'] if data else ""),
+            "name": tk.StringVar(value=data['name'] if data else ""),
+            "email": tk.StringVar(value=data['email'] if data else ""),
+            "password": tk.StringVar(value=data['password'] if data else "")
+        }
+
+        # --- UI DO MODAL ---
         
-        modal.wait_visibility()
-        modal.grab_set()
+        # Título Azul
+        lbl_title = "Novo Registro"
+        if mode == "update": lbl_title = "Editar Registro"
+        if mode == "read": lbl_title = f"Visualizar: ID {data['id']}"
 
-        # Título do Modal
-        tk.Label(modal, text=title_map[action_type], font=("Helvetica", 16, "bold"), 
-                 bg=self.MODAL_BG, fg="#333").pack(pady=20)
+        tk.Label(modal, text=lbl_title, font=("Helvetica", 16, "bold"), 
+                 bg="white", fg=self.COLOR_PRIMARY).pack(pady=20)
 
-        # Campos do Formulário
-        form_frame = tk.Frame(modal, bg=self.MODAL_BG)
-        form_frame.pack(fill="both", expand=True, padx=40)
+        # Container dos campos
+        form_frame = tk.Frame(modal, bg="white", padx=30)
+        form_frame.pack(fill="both", expand=True)
 
-        # Definição dos campos baseados no tipo de usuário
-        fields_config = []
+        # Função auxiliar para criar campos
+        def create_field(label_text, var_key, is_password=False):
+            tk.Label(form_frame, text=label_text, font=self.FONT_LABEL, bg="white", anchor="w").pack(fill="x", pady=(10, 0))
+            
+            entry = tk.Entry(form_frame, textvariable=vars_dict[var_key], font=self.FONT_ENTRY, bg="#f9f9f9", relief="solid", bd=1)
+            entry.pack(fill="x", pady=(5, 0), ipady=4)
+            
+            if is_password and mode != "read": 
+                entry.config(show="*")
+            
+            # Se for modo leitura, trava o campo
+            if mode == "read":
+                entry.config(state="readonly", fg="#666")
+
+        # --- RENDEREIZAÇÃO DOS CAMPOS (Baseado no Tipo) ---
         
-        # ID é comum a todos (Sempre readonly)
-        # Em um caso real, buscaríamos o próximo ID do banco
-        fake_next_id = str(random.randint(1000, 9999)) 
-        fields_config.append({"label": "ID:", "key": "id", "value": fake_next_id, "state": "readonly"})
-
         if self.current_user_type == "Governamental":
-            fields_config.append({"label": "Nome do Departamento:", "key": "dept_name", "value": ""})
-            fields_config.append({"label": "E-mail:", "key": "email", "value": ""})
-            fields_config.append({"label": "Senha:", "key": "password", "value": "", "show": "*"})
+            create_field("Nome do Departamento:", "dept_name")
+            create_field("E-mail de Acesso:", "email")
+            create_field("Senha:", "password", is_password=True)
         
         elif self.current_user_type == "Empresarial":
-            fields_config.append({"label": "CNPJ:", "key": "cnpj", "value": ""})
-            fields_config.append({"label": "Nome Fantasia:", "key": "name", "value": ""})
-            fields_config.append({"label": "E-mail:", "key": "email", "value": ""})
-            fields_config.append({"label": "Senha:", "key": "password", "value": "", "show": "*"})
+            create_field("CNPJ (Apenas números):", "cnpj")
+            create_field("Razão Social / Nome Fantasia:", "name")
+            create_field("E-mail:", "email")
+            create_field("Senha:", "password", is_password=True)
 
-        # Renderização dos Campos
-        self.entries = {}
+        # --- BOTÃO DE AÇÃO ---
         
-        for field in fields_config:
-            # Container do campo
-            row = tk.Frame(form_frame, bg=self.MODAL_BG)
-            row.pack(fill="x", pady=5)
-            
-            tk.Label(row, text=field["label"], font=self.MODAL_FONT_LABEL, 
-                     bg=self.MODAL_BG, anchor="w").pack(fill="x")
-            
-            # Valor Inicial (Para Read/Update simulamos dados)
-            initial_value = field["value"]
-            if action_type in ["read", "update"] and field["key"] != "id":
-                initial_value = f"Valor Simulado {field['key']}" # Mock de dados existentes
-            
-            # Estado do campo
-            state = "normal"
-            if action_type == "read" or field.get("state") == "readonly":
-                state = "readonly"
-            
-            entry = tk.Entry(row, font=self.MODAL_FONT_ENTRY, bg="#f9f9f9", 
-                             state="normal") # Criamos como normal para inserir texto
-            
-            entry.insert(0, initial_value)
-            
-            if field.get("show"): # Máscara de senha
-                # Se for visualização, talvez não devêssemos mostrar a senha, mas seguindo o pedido:
-                if action_type != "read": 
-                    entry.config(show="*")
-            
-            # Aplica o estado final (travado se for readonly)
-            entry.config(state=state)
-            
-            entry.pack(fill="x", pady=(2, 0), ipady=3)
-            self.entries[field["key"]] = entry
+        btn_text = "SALVAR"
+        btn_bg = self.COLOR_SUCCESS
+        cmd = None
 
-        # Botão de Ação
-        btn_text = ""
-        btn_cmd = None
-        
-        if action_type == "create":
-            btn_text = "CRIAR USUÁRIO"
-            btn_cmd = lambda: self.submitForm(modal, "criado")
-        elif action_type == "update":
+        if mode == "create":
+            btn_text = "CRIAR REGISTRO"
+            cmd = lambda: self.submit_to_db(modal, "insert", vars_dict, None)
+        elif mode == "update":
             btn_text = "SALVAR ALTERAÇÕES"
-            btn_cmd = lambda: self.submitForm(modal, "atualizado")
-        elif action_type == "read":
+            btn_bg = self.COLOR_WARNING
+            cmd = lambda: self.submit_to_db(modal, "update", vars_dict, data['id'])
+        elif mode == "read":
             btn_text = "FECHAR"
-            btn_bg = "#757575" # Cinza para fechar
-            btn_cmd = modal.destroy
+            btn_bg = self.COLOR_NEUTRAL
+            cmd = modal.destroy
 
-        # Renderiza botão se houver texto
-        if btn_text:
-            bg_color = self.MODAL_BTN_BG if action_type != "read" else "#757575"
-            tk.Button(modal, text=btn_text, bg=bg_color, fg=self.MODAL_BTN_FG, 
-                      font=("Helvetica", 11, "bold"), pady=10, bd=0,
-                      command=btn_cmd).pack(fill="x", padx=40, pady=30)
+        tk.Button(modal, text=btn_text, bg=btn_bg, fg="white", font=("Helvetica", 12, "bold"), 
+                  bd=0, pady=10, command=cmd).pack(fill="x", padx=30, pady=30)
 
-    def submitForm(self, modal, action_verb):
-        # Aqui capturaríamos self.entries['key'].get() para salvar no banco
-        messagebox.showinfo("Sucesso", f"Usuário {self.current_user_type} foi {action_verb} com sucesso!")
-        modal.destroy()
 
-    def actionDelete(self):
-        # Para deletar, geralmente não precisamos de form complexo, apenas ID ou seleção
-        # Simulando um popup de ID
-        id_popup = tk.Toplevel(self)
-        id_popup.title("Deletar")
-        id_popup.geometry("300x150")
-        id_popup.configure(bg="white")
-        
-        tk.Label(id_popup, text="Informe o ID para deletar:", bg="white", font=("bold", 10)).pack(pady=10)
-        entry_id = tk.Entry(id_popup)
-        entry_id.pack(pady=5)
-        
-        def confirm():
-            if entry_id.get():
-                if messagebox.askyesno("Confirmar", f"Tem certeza que deseja excluir o usuário ID {entry_id.get()}?"):
-                    messagebox.showinfo("Deletado", "Usuário removido do banco de dados.")
-                    id_popup.destroy()
-        
-        tk.Button(id_popup, text="DELETAR", bg="#f44336", fg="white", font=("bold"), command=confirm).pack(pady=10)
+    def submit_to_db(self, modal, action, vars_dict, record_id):
+        """Envia os dados para o PostgreSQL"""
+        try:
+            # Recupera valores limpos
+            val_dept = vars_dict["dept_name"].get().strip()
+            val_cnpj = vars_dict["cnpj"].get().strip()
+            val_name = vars_dict["name"].get().strip()
+            val_email = vars_dict["email"].get().strip()
+            val_pass = vars_dict["password"].get().strip()
+
+            if self.current_user_type == "Governamental":
+                # Validação simples
+                if not val_dept or not val_email or not val_pass:
+                    messagebox.showwarning("Aviso", "Preencha todos os campos.")
+                    return
+
+                if action == "insert":
+                    # ID é gerado automaticamente pelo banco (SERIAL)
+                    query = "INSERT INTO tb_government (department_name, email, password) VALUES (%s, %s, %s)"
+                    Database.execute(query, val_dept, val_email, val_pass)
+                
+                elif action == "update":
+                    query = "UPDATE tb_government SET department_name=%s, email=%s, password=%s WHERE id=%s"
+                    Database.execute(query, val_dept, val_email, val_pass, record_id)
+
+            elif self.current_user_type == "Empresarial":
+                # Lógica para empresa (similar)
+                if not val_cnpj or not val_name:
+                    messagebox.showwarning("Aviso", "CNPJ e Nome são obrigatórios.")
+                    return
+                
+                if action == "insert":
+                    # Nota: Empresas geralmente usam a procedure que cria as atividades juntas.
+                    # Aqui estou fazendo insert simples conforme o pedido do pop-up.
+                    query = "INSERT INTO tb_corporate (cnpj, company_name, email, password) VALUES (%s, %s, %s, %s)"
+                    Database.execute(query, val_cnpj, val_name, val_email, val_pass)
+                
+                elif action == "update":
+                    query = "UPDATE tb_corporate SET cnpj=%s, company_name=%s, email=%s, password=%s WHERE id=%s"
+                    Database.execute(query, val_cnpj, val_name, val_email, val_pass, record_id)
+
+            messagebox.showinfo("Sucesso", "Operação realizada com sucesso!")
+            modal.destroy() # Fecha o modal
+
+        except Exception as e:
+            messagebox.showerror("Erro Crítico", f"Falha no Banco de Dados: {e}")
 
     # endregion
