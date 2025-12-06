@@ -20,7 +20,7 @@ class Document(Model):
 
         self.setTitle(title)
         self.setFileData(file_data)
-        self.setUploadDate(upload_date)
+        self.__setUploadDate(upload_date)
         self.__setPublicWorkId(public_work_id)
         self.__setGovernmentId(government_id)
         self.__setCorporateId(corporate_id)
@@ -57,10 +57,11 @@ class Document(Model):
 
         self.__title = title
 
-    def setFileData(self, file_data: bytes):
+    def setFileData(self, raw_file_data: bytes):
+        file_data = bytes(raw_file_data)
         if not isinstance(file_data, bytes):
-            raise ValueError("Document file_data must be bytes.")
-        
+            raise ValueError(f"Document file_data must be bytes, not {type(file_data)}.")
+
         if len(file_data) == 0:
             raise ValueError("Document file_data cannot be empty.")
 
@@ -71,15 +72,14 @@ class Document(Model):
 
         self.__file_data = file_data
 
-    def setUploadDate(self):
-
-        self.__upload_date = datetime.now().date()
+    def __setUploadDate(self, upload_date: date):
+        self.__upload_date = upload_date
 
     def getData(self) -> dict:
         return {
             "title": self.getTitle(),
-            "File_data": self.getFileData(),
-            "Upload_date": self.getUploadDate(),
+            "file_data": self.getFileData(),
+            "upload_date": self.getUploadDate(),
             "public_work_id": self.getPublicWorkId(),
             "government_id": self.getGovernmentId(),
             "corporate_id": self.getCorporateId()
@@ -93,7 +93,7 @@ class Document(Model):
 
     def getUploadDate(self) -> date:
         return self.__upload_date
-    
+
     def getPublicWorkId(self) -> int:
         return self.__public_work_id
 

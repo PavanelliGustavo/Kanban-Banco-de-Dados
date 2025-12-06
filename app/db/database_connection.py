@@ -204,6 +204,7 @@ class Database:
         query = f"SELECT {cols} FROM {_from}"
         if where:
             query += f" WHERE {where}"
+        query += ";"
         cls.__cursor.execute(query)
         return cls.__cursor.fetchall()
 
@@ -321,18 +322,23 @@ class Database:
         return cls.__cursor.fetchall()
 
     @classmethod
-    def execute(cls, query: str):
-        cls.__cursor.execute(query)
+    def execute(cls, query: str, *args):
+        cls.__cursor.execute(query, *args)
         cls.__connection.commit()
 
     @classmethod
-    def __formatColumnsParam(columns: list[str]) -> str:
+    def executeFile(cls, path: str):
+        cls.__executeSqlFile(cls.__connection, cls.__cursor, Path(path))
+
+    @classmethod
+    def __formatColumnsParam(cls, columns: list[str] | None) -> str:
         if columns is not None:
             return ", ".join([f"t1.{c}" for c in columns])
         else:
             return ""
 
-    def __formatColumnsToBeSelected(columns: list[str]):
+    @classmethod
+    def __formatColumnsToBeSelected(cls, columns: list[str]):
         select_cols = ", ".join([col for col in columns if col])
         if not select_cols.strip():
             error = "Unable to perform select. At least one column must be specified"
@@ -341,7 +347,8 @@ class Database:
 
     @classmethod
     def __toSQL(cls, value: Any) -> str:
-
+        if isinstance(value, bytes):
+            return 
         if value is None:
             return "NULL"
         if isinstance(value, bool):
@@ -397,6 +404,8 @@ class Database:
 
     @classmethod
     def __createDatabase(cls):
+        cur = None
+        conn = None
         try:
             conn = cls.__connect("postgres")
             conn.autocommit = True
@@ -406,18 +415,22 @@ class Database:
             warning = "Attempted to create a database that already exists."
             logging.warning(warning)
         finally:
-            cur.close()
-            conn.close()
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
 
     @classmethod
     def __createTables(cls):
+        conn = None
+        cur = None
         try:
             conn = cls.__connect(cls.DB_NAME)
             cur = conn.cursor()
             cls.__executeSqlFile(conn, cur, cls.CREATE_TABLES_FILE)
             cls.__executeMigrations(conn, cur, cls.MIGRATIONS_DIR)
-        except:
-            pass
         finally:
-            cur.close()
-            conn.close()
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()

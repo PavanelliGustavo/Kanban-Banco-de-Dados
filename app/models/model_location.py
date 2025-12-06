@@ -1,6 +1,4 @@
-from app.db.database_connection import Database
 from app.models.model_template import Model
-from app.models.model_public_work import PublicWork
 
 
 class Location(Model):
@@ -23,7 +21,7 @@ class Location(Model):
 
     def __setUf(self, uf: str):
         if not uf in self.VALID_FEDERAL_UNITS:
-            raise ValueError("Ivalid UF")
+            raise ValueError(f"Ivalid UF: {uf}")
         self.__uf = uf
 
     def __setCity(self, city):
@@ -39,8 +37,8 @@ class Location(Model):
         if not isinstance(address, str):
             raise ValueError("Location's address must be a string.")
 
-        if len(address) > self.MAX_TITLE_LENGTH:
-            error = f"Location address length must be under {self.MAX_TITLE_LENGTH}."
+        if len(address) > self.MAX_ADDRESS_LENGTH:
+            error = f"Location address length must be under {self.MAX_ADDRESS_LENGTH}."
             raise ValueError(error)
 
         self.__address = address
@@ -51,21 +49,8 @@ class Location(Model):
     def getCity(self):
         return self.__city
 
-    def getAdress(self):
+    def getAddress(self):
         return self.__address
 
     def getData(self):
         return {"address": self.getAddress()}
-
-    @classmethod
-    def listAll(cls) -> list["Location"]:
-        tb_location = cls.TABLE_NAME
-        rows = Database.select(_from=tb_location)
-        return [cls.instanceFromDatabaseRow(row) for row in rows]
-
-    def listPublicWorks(self) -> list[PublicWork]:
-        tb_public_work = PublicWork.TABLE_NAME
-        location_match = f"id = {self.getId()}"
-        rows = Database.select(_from=tb_public_work,
-                               where=location_match)
-        return [PublicWork.instanceFromDatabaseRow(row) for row in rows]
